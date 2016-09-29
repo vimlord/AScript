@@ -1,6 +1,8 @@
 #include "main.h"
 #include "srccompile.h"
 
+#include <errno.h>
+
 char* getCodeBlock(FILE* file) {
     return stringUpTo(file, '}');
 }
@@ -48,12 +50,27 @@ char* stringUpTo(FILE* file, char c) {
 }
 
 int main(int argc, char* argv[]) {
+    
+    //If no file is provided, immediately exit w/ an error message.
+    if(argc < 2) {
+        printf("Error during compilation: No input file specified.\n");
+        return EINVAL;
+    }
+    
     //The name of the file
     char* FILENAME = argv[1];
     
     //The source file
-    printf("Compiling %s...\n", FILENAME);
     FILE* sourceFile = fopen(FILENAME, "r");
+    
+    //Checks to see if the file exists, and returns an error
+    //if the file does not exist.
+    if(sourceFile)
+        printf("Compiling %s...\n", FILENAME);
+    else {
+        printf("Error during compilation: Input file not found.\n");
+        return ENOENT;
+    }
 
     //Create a swap file for writing
     printf("Opening swapspace0...\n");
@@ -101,6 +118,11 @@ int main(int argc, char* argv[]) {
 
         nextLine = getNextLine(swapFile0);
     }
+
+    //Final cleanup
+    remove(".swapspace0.dta");
+
+
 
 }
 
