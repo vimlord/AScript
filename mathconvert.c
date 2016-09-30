@@ -94,9 +94,24 @@ int idxOfMathOp(char* str) {
 
 void pemdas(FILE* execfile, char* calc, int dst) {
     
+    if(*calc == '\0') {
+        //Fills the address with 0.
+        loadReg(execfile, 16, "$0");
+        copyRegToMem(execfile, dst, 16);
+        return;
+        
+    } else if(*calc == ' ') {
+        int i = 1;
+        while(calc[i] == ' ') i++;
+
+        pemdas(execfile, &calc[i], dst);
+
+        return;
+    }
+
     //Addition
     char* partA = contentToOperator(calc, '+');
-    if(*partA) {
+    if(strcmp(partA, calc)) {
         //There is an addition operation that can be done
         
         char* partB = &calc[strlen(partA) + 1];
@@ -126,7 +141,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
 
     //Subtraction
     partA = contentToOperator(calc, '-');
-    if(*partA) {
+    if(strcmp(partA, calc)) {
         //There is a subtraction operation that can be done
         
         char* partB = &calc[strlen(partA) + 1];
@@ -156,7 +171,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     
     //Multiplication
     partA = contentToOperator(calc, '*');
-    if(*partA) {
+    if(strcmp(partA, calc)) {
         //There is a multiplication operation that can be done
         /* MULTIPLICATION IS INCOMPLETE */
 
@@ -184,6 +199,19 @@ void pemdas(FILE* execfile, char* calc, int dst) {
         
         return;
     }
+
+    if(*calc == '(') {
+        //There is something in parentheses here.
+        char* parcont = parenthesesContent(&calc[1]);
+        pemdas(execfile, parcont, dst);
+
+        int i = 0;
+        while(parcont[i]) parcont[i++] = '\0';
+
+        return;
+    }
+
+
 
 }
 

@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Werror -Wall --pedantic
+CFLAGS = -Wall -Werror --pedantic -g
 
 EXEC = testfile
 OBJS = main.o srccompile.o list.o asmcommands.o mathconvert.o
