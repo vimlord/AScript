@@ -1,5 +1,4 @@
 #include "srccompile.h"
-#include "list.h"
 #include "asmcommands.h"
 
 #include <stdlib.h>
@@ -8,8 +7,12 @@
 
 char* TOKENS[] = {"byte", NULL};
 
-//The list of all variables.
+//A singleton list that holds the program variables
 List VARIABLES = NULL;
+
+List getVars() {
+    return VARIABLES ? VARIABLES : (VARIABLES = makeList());
+}
 
 int compTok(CMP_TOK a, CMP_TOK b) {
     return strcmp(a, b);
@@ -22,19 +25,14 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
     //A buffer that holds the next line(s) of assembly. 
     char varline[128];
 
-    printf("Adding var at 0x%i called '%s'\n", vars, varname);
+    printf("Adding var at 0x%x called '%s'\n", vars + 0x0100, varname);
     
     //Creates the variable list if it doesn't already exist.
-    if(VARIABLES == NULL)
-        VARIABLES = makeList();
-    
 
-    addToList(VARIABLES, varname);
+    addToList(getVars(), varname);
 
     //Defines a variable w/ initial value of 0.
     sprintf(varline, "ldi r16, 0\nsts 0x%x, r16\n", vars + 0x0100);
-    
-    printf("%s", varline);
     
     writeAsmBlock(stkfile, varline);
 
@@ -44,7 +42,7 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
 
 void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
-    printf("Checking line: %s\n", line);
+    printf("\nChecking line: %s\n", line);
     //Will test for the index of the first token
     char* tokidx;
     
@@ -61,6 +59,22 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
             //printf("'%s' does not match.\n", TOKENS[i]);
         }
     }
+
+    //Try for variable assignments
+    i = 0;
+    int len = listSize(VARIABLES);
+    while(i < len) {
+        char* varname = getFromList(VARIABLES, i);
+        
+        /* INCOMPLETE */
+
+        if((tokidx = strstr(line, varname))) {
+            //The variable is in the string
+        }
+        
+        i++;
+    }
+
 }
 
 void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
@@ -72,9 +86,15 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         
         //Stores the var name in a variable.
         int len = 0;
-        while(subline[len] && subline[len] != ' ') len++;
+        while(subline[len] != ' ') len++;
         char* varname = (char*) malloc((len + 1) * sizeof(char));
-        while(--len != 0) varname[len] = subline[len];
+        
+        varname[len] = '\0';
+        int i = 0;
+        while(i < len) {
+            varname[i] = subline[i];
+            i++;
+        }
 
         //Adds the variable.
         addStackFrameVar(stkfile, tok, 0, varname);

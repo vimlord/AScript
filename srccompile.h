@@ -1,3 +1,5 @@
+#include "list.h"
+
 #include <stdio.h>
 
 #ifndef _SRCCMP_H_
@@ -7,6 +9,8 @@
 typedef char* CMP_TOK;
 
 char* TOKENS[2]; 
+
+List getVars();
 
 int compTok(CMP_TOK a, CMP_TOK b);
 
