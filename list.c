@@ -35,7 +35,7 @@ void addToList(List lst, char* val) {
         Node curr = lst->front;
         while(curr->next) curr = curr->next;
         
-        curr->next = makeNode(strdup(val));
+        curr->next = makeNode(val);
     }
 }
 

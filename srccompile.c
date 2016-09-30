@@ -1,5 +1,6 @@
 #include "srccompile.h"
 #include "list.h"
+#include "asmcommands.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +9,7 @@
 char* TOKENS[] = {"byte", NULL};
 
 //The list of all variables.
-List variables = NULL;
+List VARIABLES = NULL;
 
 int compTok(CMP_TOK a, CMP_TOK b) {
     return strcmp(a, b);
@@ -17,7 +18,6 @@ int compTok(CMP_TOK a, CMP_TOK b) {
 int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
 
     static int vars = 0;
-    int i = 0;
     
     //A buffer that holds the next line(s) of assembly. 
     char varline[128];
@@ -25,20 +25,18 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
     printf("Adding var at 0x%i called '%s'\n", vars, varname);
     
     //Creates the variable list if it doesn't already exist.
-    if(variables == NULL)
-        variables = makeList();
-    addToList(variables, varname);
+    if(VARIABLES == NULL)
+        VARIABLES = makeList();
+    
+
+    addToList(VARIABLES, varname);
 
     //Defines a variable w/ initial value of 0.
-    sprintf(varline, "ldi r16, $%x\nsts $%x, r16\n", vars + 0x0100, vars + 0x0100);
-    
-    //Sets i to the length of varline.
-    i = -1;
-    while(varline[++i]);
+    sprintf(varline, "ldi r16, 0\nsts 0x%x, r16\n", vars + 0x0100);
     
     printf("%s", varline);
-
-    fwrite(varline, 1, i, stkfile);
+    
+    writeAsmBlock(stkfile, varline);
 
     return vars++; 
 
@@ -71,19 +69,24 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
 
     if(!compTok(tok, "byte")) {
         printf("Adding a new variable of type '%s'\n", tok);
-        //Computes the size of the variable name.
-        /*
+        
+        //Stores the var name in a variable.
         int len = 0;
         while(subline[len] && subline[len] != ' ') len++;
-        */
-
-        //Stores the var name in a variable.
-        char* varname = subline;
+        char* varname = (char*) malloc((len + 1) * sizeof(char));
+        while(--len != 0) varname[len] = subline[len];
 
         //Adds the variable.
-        addStackFrameVar(stkfile, tok, 0, varname); 
+        addStackFrameVar(stkfile, tok, 0, varname);
+
+        //If a variable is followed by a definition
+        //the code for doing so should be generated.
+        parseLine(stkfile, execfile, subline);
+
     }
 
 }
+
+
 
 
