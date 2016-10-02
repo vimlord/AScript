@@ -3,6 +3,8 @@
 void writeAsmBlock(FILE* file, char* line) {
     int i = -1;
     while(line[++i]);
+    
+    printf("%s", line);
 
     fwrite(line, 1, i, file);
 }

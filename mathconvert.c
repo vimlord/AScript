@@ -95,6 +95,8 @@ int idxOfMathOp(char* str) {
 
 void pemdas(FILE* execfile, char* calc, int dst) {
     
+    //printf("%s\n", calc);
+
     //Get the index of \0
     int i = 0;
     while(calc[i] != '\0') i++;

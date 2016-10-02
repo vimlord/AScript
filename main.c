@@ -97,9 +97,13 @@ int main(int argc, char* argv[]) {
     //the source without newlines.
     fclose(sourceFile); //Source file is no longer needed
     fclose(swapFile0);
+    
+    printf("Opening swapspace0 for reading...\n");
 
     //Reopen the swap file, only this time for reading.
     swapFile0 = fopen(".swapspace0.dta", "r");
+
+    printf("Opening dta files for writing...\n");
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.

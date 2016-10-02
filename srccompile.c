@@ -42,6 +42,8 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
 }
 
 void parseLine(FILE* stkfile, FILE* execfile, char* line) {
+    
+    //printf("LINE: %s\n", line);
 
     //Will test for the index of the first token
     char* tokidx;
@@ -79,10 +81,13 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
 void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
     
-    if(!compTok(tok, "byte")) {
+    //printf("TOKEN: '%s'\nLINE: '%s'\n", tok, subline);
+
+    if(compTok(tok, "byte") == 0) {
+        
         //Stores the var name in a variable.
         int len = 0;
-        while(subline[len] != ' ') len++;
+        while(subline[len] != ' ' && subline[len]) len++;
         char* varname = (char*) malloc((len + 1) * sizeof(char));
         
         varname[len] = '\0';
@@ -91,25 +96,31 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
             varname[i] = subline[i];
             i++;
         }
+        
+        //printf("Going to add.\n");
 
         //Adds the variable.
         addStackFrameVar(stkfile, tok, 0, varname);
 
+        //The memory address of the new variable.
+        int valIdx = 0x0100 + listSize(getVars());
+        
         //If followed by an equal sign, include a definition for the variable.
         while(subline[i] == ' ') i++;
-        if(subline[i] || subline[i] == '=') {
-
+        
+        if(subline[i] == '=') {
+            
             //Since the variable is in the end slot, we can have
             //pemdas() push the values directly there.
-            int valIdx = 0x0100 + listSize(getVars());
-            pemdas(stkfile, subline ? &subline[i+1] : "0", valIdx-1);
+
+            pemdas(stkfile, subline[i+1] ? &subline[i+1] : "0", valIdx-1);
             
-            writeAsmBlock(stkfile, "\n"); 
 
         } else {
-            
+            pemdas(stkfile, "0", valIdx); 
         }
         
+        writeAsmBlock(stkfile, "\n"); 
 
     }
 
