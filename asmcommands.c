@@ -24,14 +24,14 @@ void copyRegFromMem(FILE* execfile, int dst, int src) {
     sprintf(scratch, "ldi zl, $%x\n", zl);
     writeAsmBlock(execfile, scratch);
     
-    sprintf(scratch, "ld 0x%x, z", dst);
+    sprintf(scratch, "ld 0x%x, z\n", dst);
     writeAsmBlock(execfile, scratch);
 }
 
 void copyRegToMem(FILE* execfile, int dst, int src) {
     char scratch[64];
 
-    sprintf(scratch, "sts 0x%x, 0x%x", dst, src);
+    sprintf(scratch, "sts 0x%x, 0x%x\n", dst, src);
     writeAsmBlock(execfile, scratch);
 }
 void loadReg(FILE* execfile, int r, char* v) {

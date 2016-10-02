@@ -1,5 +1,7 @@
 #include "srccompile.h"
+
 #include "asmcommands.h"
+#include "mathconvert.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -23,18 +25,17 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
     static int vars = 0;
     
     //A buffer that holds the next line(s) of assembly. 
-    char varline[128];
-
-    printf("Adding var at 0x%x called '%s'\n", vars + 0x0100, varname);
-    
-    //Creates the variable list if it doesn't already exist.
 
     addToList(getVars(), varname);
-
+    
+    /*
+    char varline[128];
+    
     //Defines a variable w/ initial value of 0.
     sprintf(varline, "ldi r16, 0\nsts 0x%x, r16\n", vars + 0x0100);
     
     writeAsmBlock(stkfile, varline);
+    */
 
     return vars++; 
 
@@ -42,7 +43,6 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
 
 void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
-    printf("\nChecking line: %s\n", line);
     //Will test for the index of the first token
     char* tokidx;
     
@@ -79,11 +79,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
 void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
     
-
-
     if(!compTok(tok, "byte")) {
-        printf("Adding a new variable of type '%s'\n", tok);
-        
         //Stores the var name in a variable.
         int len = 0;
         while(subline[len] != ' ') len++;
@@ -99,9 +95,21 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         //Adds the variable.
         addStackFrameVar(stkfile, tok, 0, varname);
 
-        //If a variable is followed by a definition
-        //the code for doing so should be generated.
-        parseLine(stkfile, execfile, subline);
+        //If followed by an equal sign, include a definition for the variable.
+        while(subline[i] == ' ') i++;
+        if(subline[i] || subline[i] == '=') {
+
+            //Since the variable is in the end slot, we can have
+            //pemdas() push the values directly there.
+            int valIdx = 0x0100 + listSize(getVars());
+            pemdas(stkfile, subline ? &subline[i+1] : "0", valIdx-1);
+            
+            writeAsmBlock(stkfile, "\n"); 
+
+        } else {
+            
+        }
+        
 
     }
 
