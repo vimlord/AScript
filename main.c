@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
         int i = -1;
         while(nextLine[++i]);
         
-        printf("%s\n", nextLine);
+        //printf("%s\n", nextLine);
         fwrite(nextLine, 1, i, swapFile0);
 
         //Needs to be freed
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     }
 
     
-    printf("\nClosing source and swapspace0...\n");
+    printf("Closing source and swapspace0...\n");
     //At this point, .swapspace0.swp contains 
     //the source without newlines.
     fclose(sourceFile); //Source file is no longer needed

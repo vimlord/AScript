@@ -72,6 +72,18 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
         if((tokidx = strstr(line, varname))) {
             //The variable is in the string
+            
+            int idx = (int) strlen(varname);
+            int memAddrs = 0x0100 + listSize(getVars());
+
+            //By default, no equals sign means that the value will be set to 0.
+            while(tokidx[idx] && tokidx[idx] != '=') idx++;
+             
+            pemdas(execfile, tokIdx[idx+1] ? &tokIdx[idx+1] : "0", 0x0100 + listSize(memAddrs));
+            
+            //Copies value into slot
+            copyRegFromMem(execfile, 0x10, memAddrs);
+            copyRegToMem(execfile, 0x0100 + i, 0x10);
         }
         
         i++;
@@ -103,7 +115,7 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         addStackFrameVar(stkfile, tok, 0, varname);
 
         //The memory address of the new variable.
-        int valIdx = 0x0100 + listSize(getVars());
+        int valIdx = 0x0100 + listSize(getVars()) - 1;
         
         //If followed by an equal sign, include a definition for the variable.
         while(subline[i] == ' ') i++;
@@ -113,15 +125,12 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
             //Since the variable is in the end slot, we can have
             //pemdas() push the values directly there.
 
-            pemdas(stkfile, subline[i+1] ? &subline[i+1] : "0", valIdx-1);
+            pemdas(stkfile, subline[i+1] ? &subline[i+1] : "0", valIdx);
             
-
         } else {
             pemdas(stkfile, "0", valIdx); 
         }
         
-        writeAsmBlock(stkfile, "\n"); 
-
     }
 
 }
