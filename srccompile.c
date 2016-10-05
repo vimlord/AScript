@@ -46,7 +46,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
     //printf("LINE: %s\n", line);
 
     //Will test for the index of the first token
-    char* tokidx;
+    char* tokidx = NULL;
     
     //Processes by token, if possible.
     int i = -1;
@@ -79,7 +79,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
             //By default, no equals sign means that the value will be set to 0.
             while(tokidx[idx] && tokidx[idx] != '=') idx++;
              
-            pemdas(execfile, tokIdx[idx+1] ? &tokIdx[idx+1] : "0", 0x0100 + listSize(memAddrs));
+            pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0", memAddrs);
             
             //Copies value into slot
             copyRegFromMem(execfile, 0x10, memAddrs);
