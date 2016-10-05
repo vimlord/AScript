@@ -56,14 +56,14 @@ char* bracketContent(char* start) {
     return closureContent(start, '{', '}');
 }
 
-char* contentToOperator(char* start, char op) {
+char* contentToOperator(char* start, char op, char up, char down) {
     int len = 0;
 
     while(start[len] != '\0') {
         if(start[len] == op)
             break;
         else if(start[len] == '(')
-            len += indexOfClosingChar(&start[len], '(', ')');
+            len += indexOfClosingChar(&start[len], up, down);
         
         len++;
 
@@ -138,7 +138,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     
     
     //Addition
-    char* partA = contentToOperator(calc, '+');
+    char* partA = contentToOperator(calc, '+', '{', '}');
     if(strcmp(partA, calc)) {
 
         //There is an addition operation that can be done
@@ -167,7 +167,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     free(partA);
 
     //Subtraction
-    partA = contentToOperator(calc, '-');
+    partA = contentToOperator(calc, '-', '{', '}');
     if(strcmp(partA, calc)) {
 
         //There is a subtraction operation that can be done
@@ -196,7 +196,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     free(partA);
 
     //Multiplication
-    partA = contentToOperator(calc, '*');
+    partA = contentToOperator(calc, '*', '{', '}');
     if(strcmp(partA, calc)) {
 
         //There is a multiplication operation that can be done

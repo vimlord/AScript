@@ -22,6 +22,8 @@ int compTok(CMP_TOK a, CMP_TOK b);
  */
 int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname);
 
+void parseSegment(FILE* stkfile, FILE* execfile, char* code);
+
 /**
  * Interprets a line of code and determines what
  * it should do. Makes the necessary changes to

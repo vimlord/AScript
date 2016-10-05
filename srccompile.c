@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
-char* TOKENS[] = {"byte", NULL};
+char* TOKENS[] = {"byte", "if", NULL};
 
 //A singleton list that holds the program variables
 List VARIABLES = NULL;
@@ -38,6 +38,21 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
     */
 
     return vars++; 
+
+}
+
+void parseSegment(FILE* stkfile, FILE* execfile, char* line) {
+    char* nextLine = NULL;
+    char* front = line;
+
+    while(*front) {
+        //Parse the next line.
+        nextLine = contentToOperator(front, ';', '{', '}');
+        while((*front) && (*front) != ';') front = &front[1];
+        
+        parseLine(stkfile, execfile, nextLine);
+
+    }
 
 }
 
@@ -131,6 +146,10 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
             pemdas(stkfile, "0", valIdx); 
         }
         
+    } else if(compTok(tok, "if") == 0) {
+
+        //An if statement
+
     }
 
 }

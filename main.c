@@ -4,30 +4,37 @@
 #include <errno.h>
 
 char* getCodeBlock(FILE* file) {
-    return stringUpTo(file, '}');
+    return stringUpTo(file, '}', '{', '}');
 }
 
 char* getNextLine(FILE* file) {
-    return stringUpTo(file, ';');
+    return stringUpTo(file, ';', '{', '}');
 }
 
-char* stringUpTo(FILE* file, char c) {
+char* stringUpTo(FILE* file, char c, char up, char down) {
 
     int i = 0, j = 0;
     char* line = (char*) malloc(sizeof(char));;
     char* swp;
     char nextChar;
     
+    int level = 0;
+
     *line = fgetc(file);
     
 
     if(*line == EOF) return line;
     else while(*line == ' ') *line = fgetc(file);
 
-    while(line[i] != c) {
+    while(line[i] != c || level) {
         i++;
         //Read char
         nextChar = fgetc(file);
+
+        if(nextChar == up)
+            level++;
+        if(nextChar == down)
+            level--;
 
         //Create new memory slot, and put line into it
         swp = (char*) malloc(i+1 * sizeof(char));
@@ -79,7 +86,7 @@ int main(int argc, char* argv[]) {
     //Moves the chars to the new file, without the newlines.
     printf("Morphing source into swapspace0...\n");
     char* nextLine;
-    while(*(nextLine = stringUpTo(sourceFile, '\n')) != EOF) {
+    while(*(nextLine = stringUpTo(sourceFile, '\n', '\0', '\0')) != EOF) {
         //Gets the length of the String.
         int i = -1;
         while(nextLine[++i]);
@@ -118,7 +125,7 @@ int main(int argc, char* argv[]) {
         //printf("%i\n", (int) *nextLine);
 
         //Parse the current line.
-        parseLine(stkdata, execdata, nextLine);
+        parseSegment(stkdata, execdata, nextLine);
 
         nextLine = getNextLine(swapFile0);
     }

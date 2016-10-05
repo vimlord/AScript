@@ -20,4 +20,4 @@ char* getCodeBlock(FILE* file);
  */
 char* getNextLine(FILE* file);
 
-char* stringUpTo(FILE* file, char c);
+char* stringUpTo(FILE* file, char c, char up, char down);

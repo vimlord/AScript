@@ -14,3 +14,6 @@ clean:
 fclean:
 	rm -f $(OBJS) $(EXEC)
 
+re:
+	make fclean all
+
