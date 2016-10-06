@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
-char* TOKENS[] = {"if", "byte", NULL};
+char* TOKENS[3] = {"if", "byte", ""};
 
 //A singleton list that holds the program variables
 List VARIABLES = NULL;
@@ -50,12 +50,18 @@ void parseSegment(FILE* stkfile, FILE* execfile, char* line) {
     depth++;
 
     while(*front) {
+        
         //Parse the next line.
         nextLine = contentToOperator(front, ';', '{', '}');
+         
         front = &front[strlen(nextLine)]; 
+        while(*front == ';' || *front == ' ')
+            front = &front[1];
 
-        parseLine(stkfile, execfile, nextLine);
+        //printf("LINE: '%s'\n", nextLine);
         
+        parseLine(stkfile, execfile, nextLine);
+
         writeAsmBlock(execfile, "\n");
 
         if(*front)
@@ -74,18 +80,19 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         writeComment(execfile, line);
     }
 
-    printf("LINE: '%s'\n", line);
     
     //Will test for the index of the first token
     char* tokidx = NULL;
     
     //Processes by token, if possible.
     int i = 0;
-    while(TOKENS[i]) {
+    while(strcmp(TOKENS[i], "")) {
+
         //If a token is found, process it.
         tokidx = strstr(line, TOKENS[i]);
 
         if(tokidx) {
+
             processToken(stkfile, execfile, TOKENS[i],
                          &tokidx[1 + strlen(TOKENS[i])]);
             //Nothing else needs to be done; return.
@@ -100,7 +107,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
     int len = listSize(VARIABLES);
     while(i < len) {
         char* varname = getFromList(VARIABLES, i);
-
+        
         if((tokidx = strstr(line, varname))) {
             //The variable is in the string
             
@@ -169,14 +176,14 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         //Get the if condition
         int len = 0;
         while(subline[len] != '(') len++;
+        
         char* condition = closureContent(&subline[len+1], '(', ')');
         len += strlen(condition) + 1; //Len therefore hold the idx of the closing parenthesis.
-
+        
         //Creates the text for the else label
         char elseLabel[64];
         sprintf(elseLabel, "else%i", tokenid);
        
-        printf("CONDITION ON: '%s'\n", condition);
         jumpIfFalse(execfile, condition, elseLabel, 0x0100 + listSize(getVars()));
         
         //Gets the code block to run
