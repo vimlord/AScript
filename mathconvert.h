@@ -15,4 +15,5 @@ char* contentToOperator(char* start, char op, char up, char down);
  */
 void pemdas(FILE* execfile, char* calc, int dst);
 
+void jumpIfTrue(FILE* execfile, char* cond, char* label, int stkptr);
 void jumpIfFalse(FILE* execfile, char* cond, char* label, int stkptr);

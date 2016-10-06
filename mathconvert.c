@@ -270,6 +270,23 @@ void pemdas(FILE* execfile, char* calc, int dst) {
 
 }
 
+void jumpIfTrue(FILE* execfile, char* cond, char* label, int stkptr) {
+     
+    writeComment(execfile, "Compute conditional");
+    pemdas(execfile, cond, stkptr);
+    
+    writeComment(execfile, "Get values");
+    //Copies the value into registers
+    copyRegFromMem(execfile, 0x10, stkptr);
+    loadReg(execfile, 0x11, "$0");
+    
+    writeComment(execfile, "Branch if nonzero");
+    //Branches if equal to zero (0 is false)
+    branchNE(execfile, 0x10, 0x11, label);
+
+
+}
+
 void jumpIfFalse(FILE* execfile, char* cond, char* label, int stkptr) {
     
     writeComment(execfile, "Compute conditional");
