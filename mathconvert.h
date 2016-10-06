@@ -14,3 +14,5 @@ char* contentToOperator(char* start, char op, char up, char down);
  * dst  - The address where the result will be stored.
  */
 void pemdas(FILE* execfile, char* calc, int dst);
+
+void jumpIfFalse(FILE* execfile, char* cond, char* label, int stkptr);

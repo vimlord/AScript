@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
-char* TOKENS[] = {"byte", "if", NULL};
+char* TOKENS[] = {"if", "byte", NULL};
 
 //A singleton list that holds the program variables
 List VARIABLES = NULL;
@@ -44,46 +44,62 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
 void parseSegment(FILE* stkfile, FILE* execfile, char* line) {
     char* nextLine = NULL;
     char* front = line;
+    
+    static int depth = 0;
+
+    depth++;
 
     while(*front) {
         //Parse the next line.
         nextLine = contentToOperator(front, ';', '{', '}');
-        while((*front) && (*front) != ';') front = &front[1];
-        
-        parseLine(stkfile, execfile, nextLine);
+        front = &front[strlen(nextLine)]; 
 
+        parseLine(stkfile, execfile, nextLine);
+        
+        writeAsmBlock(execfile, "\n");
+
+        if(*front)
+            front = &front[1];
     }
+
+    depth--;
 
 }
 
 void parseLine(FILE* stkfile, FILE* execfile, char* line) {
     
-    //printf("LINE: %s\n", line);
+    if(!(*line))
+        return;
+    else {
+        writeComment(execfile, line);
+    }
 
+    printf("LINE: '%s'\n", line);
+    
     //Will test for the index of the first token
     char* tokidx = NULL;
     
     //Processes by token, if possible.
-    int i = -1;
-    while(TOKENS[++i]) {
+    int i = 0;
+    while(TOKENS[i]) {
         //If a token is found, process it.
-        if((tokidx = strstr(line, TOKENS[i]))) {
+        tokidx = strstr(line, TOKENS[i]);
+
+        if(tokidx) {
             processToken(stkfile, execfile, TOKENS[i],
                          &tokidx[1 + strlen(TOKENS[i])]);
             //Nothing else needs to be done; return.
-            return;
-        } else {
-            //printf("'%s' does not match.\n", TOKENS[i]);
-        }
-    }
 
+            return;
+        }
+        i++;
+    }
+    
     //Try for variable assignments
     i = 0;
     int len = listSize(VARIABLES);
     while(i < len) {
         char* varname = getFromList(VARIABLES, i);
-        
-        /* INCOMPLETE */
 
         if((tokidx = strstr(line, varname))) {
             //The variable is in the string
@@ -108,13 +124,15 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
 void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
     
-    //printf("TOKEN: '%s'\nLINE: '%s'\n", tok, subline);
+    static int tokenid = -1;
+    tokenid++;
 
     if(compTok(tok, "byte") == 0) {
-        
-        //Stores the var name in a variable.
+ 
         int len = 0;
         while(subline[len] != ' ' && subline[len]) len++;
+           
+        //Stores the var name in a variable.
         char* varname = (char*) malloc((len + 1) * sizeof(char));
         
         varname[len] = '\0';
@@ -127,7 +145,7 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         //printf("Going to add.\n");
 
         //Adds the variable.
-        addStackFrameVar(stkfile, tok, 0, varname);
+        addStackFrameVar(execfile, tok, 0, varname);
 
         //The memory address of the new variable.
         int valIdx = 0x0100 + listSize(getVars()) - 1;
@@ -140,16 +158,48 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
             //Since the variable is in the end slot, we can have
             //pemdas() push the values directly there.
 
-            pemdas(stkfile, subline[i+1] ? &subline[i+1] : "0", valIdx);
+            pemdas(execfile, subline[i+1] ? &subline[i+1] : "0", valIdx);
             
         } else {
-            pemdas(stkfile, "0", valIdx); 
+            pemdas(execfile, "0", valIdx); 
         }
         
     } else if(compTok(tok, "if") == 0) {
+        
+        //Get the if condition
+        int len = 0;
+        while(subline[len] != '(') len++;
+        char* condition = closureContent(&subline[len+1], '(', ')');
+        len += strlen(condition) + 1; //Len therefore hold the idx of the closing parenthesis.
 
-        //An if statement
+        //Creates the text for the else label
+        char elseLabel[64];
+        sprintf(elseLabel, "else%i", tokenid);
+       
+        printf("CONDITION ON: '%s'\n", condition);
+        jumpIfFalse(execfile, condition, elseLabel, 0x0100 + listSize(getVars()));
+        
+        //Gets the code block to run
+        //int endIdx = len + indexOfClosingChar(&subline[len+1], '(', ')') + 2;
+        //while(subline[endIdx] != ' ' && subline[endIdx]) endIdx++;
+        while(subline[len] != '{') len++;
+        char* function = closureContent(&subline[len+1], '{', '}');
+        
+        /*        
+        int strtBlk = 0;
+        while(function[strtBlk] != '{')
+            strtBlk++;
+        */
+        //printf("STRT: %i : '%s'\n", strtBlk, &function[strtBlk+1]);
+        
+        parseSegment(stkfile, execfile, function);
 
+        char modLabel[64];
+        sprintf(modLabel, "%s:\n", elseLabel);
+        writeAsmBlock(execfile, modLabel);
+
+        free(condition);
+        free(function);
     }
 
 }

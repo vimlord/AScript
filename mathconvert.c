@@ -36,12 +36,14 @@ char* closureContent(char* str, char start, char end) {
         }
         len++;
     }
-
+    
     //The inveriant is that len is at the end of the content
     char* result = (char*) malloc((len+1) * sizeof(char));
     i = 0;
-    while(i < len)
+    while(i < len) {
         result[i] = str[i];
+        i++;
+    }
     result[i] = '\0';
 
     return result;
@@ -138,7 +140,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     
     
     //Addition
-    char* partA = contentToOperator(calc, '+', '{', '}');
+    char* partA = contentToOperator(calc, '+', '(', ')');
     if(strcmp(partA, calc)) {
 
         //There is an addition operation that can be done
@@ -167,7 +169,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     free(partA);
 
     //Subtraction
-    partA = contentToOperator(calc, '-', '{', '}');
+    partA = contentToOperator(calc, '-', '(', ')');
     if(strcmp(partA, calc)) {
 
         //There is a subtraction operation that can be done
@@ -196,7 +198,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     free(partA);
 
     //Multiplication
-    partA = contentToOperator(calc, '*', '{', '}');
+    partA = contentToOperator(calc, '*', '(', ')');
     if(strcmp(partA, calc)) {
 
         //There is a multiplication operation that can be done
@@ -268,4 +270,17 @@ void pemdas(FILE* execfile, char* calc, int dst) {
 
 }
 
-
+void jumpIfFalse(FILE* execfile, char* cond, char* label, int stkptr) {
+    
+    writeComment(execfile, "Compute conditional");
+    pemdas(execfile, cond, stkptr);
+    
+    writeComment(execfile, "Get values");
+    //Copies the value into registers
+    copyRegFromMem(execfile, 0x10, stkptr);
+    loadReg(execfile, 0x11, "$0");
+    
+    writeComment(execfile, "Branch if zero");
+    //Branches if equal to zero (0 is false)
+    branchEQ(execfile, 0x10, 0x11, label);
+}

@@ -21,12 +21,11 @@ char* stringUpTo(FILE* file, char c, char up, char down) {
     int level = 0;
 
     *line = fgetc(file);
-    
 
     if(*line == EOF) return line;
     else while(*line == ' ') *line = fgetc(file);
 
-    while(line[i] != c || level) {
+    while(line[i] != EOF && (line[i] != c || level)) {
         i++;
         //Read char
         nextChar = fgetc(file);
@@ -121,12 +120,10 @@ int main(int argc, char* argv[]) {
     nextLine = getNextLine(swapFile0);
     while(*nextLine != '\0' && *nextLine != EOF) {
         if(i++ > 10) break;
-        //else printf("[%i]", EOF == *nextLine);
-        //printf("%i\n", (int) *nextLine);
 
         //Parse the current line.
         parseSegment(stkdata, execdata, nextLine);
-
+         
         nextLine = getNextLine(swapFile0);
     }
 
