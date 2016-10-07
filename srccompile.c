@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
-char* TOKENS[3] = {"if", "byte", ""};
+char* TOKENS[] = {"if", "while", "byte", ""};
 
 //A singleton list that holds the program variables
 List VARIABLES = NULL;
@@ -58,14 +58,12 @@ void parseSegment(FILE* stkfile, FILE* execfile, char* line) {
         while(*front == ';' || *front == ' ')
             front = &front[1];
 
-        //printf("LINE: '%s'\n", nextLine);
+        printf("LEFT: '%s'\n", front);
         
         parseLine(stkfile, execfile, nextLine);
 
         writeAsmBlock(execfile, "\n");
 
-        if(*front)
-            front = &front[1];
     }
 
     depth--;
@@ -80,7 +78,8 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         writeComment(execfile, line);
     }
 
-    
+    printf("LINE: %s\n", line);
+
     //Will test for the index of the first token
     char* tokidx = NULL;
     
@@ -91,7 +90,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         //If a token is found, process it.
         tokidx = strstr(line, TOKENS[i]);
 
-        if(tokidx) {
+        if(tokidx == line) {
 
             processToken(stkfile, execfile, TOKENS[i],
                          &tokidx[1 + strlen(TOKENS[i])]);
@@ -187,17 +186,8 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         jumpIfFalse(execfile, condition, elseLabel, 0x0100 + listSize(getVars()));
         
         //Gets the code block to run
-        //int endIdx = len + indexOfClosingChar(&subline[len+1], '(', ')') + 2;
-        //while(subline[endIdx] != ' ' && subline[endIdx]) endIdx++;
         while(subline[len] != '{') len++;
         char* function = closureContent(&subline[len+1], '{', '}');
-        
-        /*        
-        int strtBlk = 0;
-        while(function[strtBlk] != '{')
-            strtBlk++;
-        */
-        //printf("STRT: %i : '%s'\n", strtBlk, &function[strtBlk+1]);
         
         parseSegment(stkfile, execfile, function);
 
@@ -205,6 +195,49 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         sprintf(modLabel, "%s:\n", elseLabel);
         writeAsmBlock(execfile, modLabel);
 
+        free(condition);
+        free(function);
+    } else if(compTok(tok, "while") == 0) {
+        
+        //Get the while condition
+        int len = 0;
+        while(subline[len] != '(') len++;
+        
+        char* condition = closureContent(&subline[len+1], '(', ')');
+        len += strlen(condition) + 1; //Len therefore hold the idx of the closing parenthesis.
+        
+        //Create the custom label for jumping
+        char whileLabel[64];
+        char modLabel[64];
+        sprintf(whileLabel, "while%i", tokenid);
+
+        //Makes the starting label for the while loop. The program jumps
+        //here after every execution of the contents of the while loop
+        sprintf(modLabel, "%s:\n", whileLabel);
+        writeAsmBlock(execfile, modLabel);
+        
+        //Gets the exit label
+        char endWhileLabel[64];
+        sprintf(endWhileLabel, "end%s", whileLabel);
+
+        //If false, exit the loop
+        jumpIfFalse(execfile, condition, endWhileLabel, 0x0100 + listSize(getVars()));
+
+        //Otherwise, execute
+        //Gets the code block to run
+        while(subline[len] != '{') len++;
+        char* function = closureContent(&subline[len+1], '{', '}');
+        
+        //Have the segment run
+        parseSegment(stkfile, execfile, function);
+
+        //Adds the backwards jump to the start
+        jumpToLabel(execfile, whileLabel);
+        
+        //Exit label
+        sprintf(modLabel, "exit%s:\n", whileLabel);
+        writeAsmBlock(execfile, modLabel);
+        
         free(condition);
         free(function);
     }

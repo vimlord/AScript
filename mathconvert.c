@@ -23,6 +23,13 @@ int indexOfClosingChar(char* str, char start, char end) {
     return str[len] ? -1 : len;
 }
 
+/**
+ * Gets the content of opening and closing chars
+ * str   - The string starting at the char after a
+ *         char equal to start
+ * start - An opening character
+ * end   - A closing character
+ */
 char* closureContent(char* str, char start, char end) {
     int len = 0, i = 0;
     while(str[len]) {
@@ -58,6 +65,10 @@ char* bracketContent(char* start) {
     return closureContent(start, '{', '}');
 }
 
+/**
+ * Gets everything up until a certain operator, as long as there
+ * is closure in the string as definied by the up and down characters
+ */
 char* contentToOperator(char* start, char op, char up, char down) {
     int len = 0;
 

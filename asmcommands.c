@@ -81,6 +81,15 @@ void branchLT(FILE* execfile, int regA, int regB, char* br) {
 
 }
 
+void jumpToLabel(FILE* execfile, char* label) {
+    char scratch[64];
+    
+    //Jump to label
+    sprintf(scratch, "jmp %s\n", label);
+    writeAsmBlock(execfile, scratch);
+
+}
+
 void copyReg(FILE* execfile, int dst, int src) {
     char cmdline[64];
     sprintf(cmdline, "mov $%x, $%x\n", dst, src);

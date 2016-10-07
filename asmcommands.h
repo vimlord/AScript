@@ -10,6 +10,8 @@ void branchGT(FILE* execfile, int regA, int regB, char* br);
 void branchLE(FILE* execfile, int regA, int regB, char* br);
 void branchLT(FILE* execfile, int regA, int regB, char* br);
 
+void jumpToLabel(FILE* execfile, char* label);
+
 void copyReg(FILE* execfile, int dst, int src);
 void copyRegFromMem(FILE* execfile, int dst, int src);
 void copyRegToMem(FILE* execfile, int dst, int src);

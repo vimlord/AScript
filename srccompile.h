@@ -8,7 +8,7 @@
 //Tokens
 typedef char* CMP_TOK;
 
-char* TOKENS[3]; 
+char* TOKENS[4]; 
 
 List getVars();
 
