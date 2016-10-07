@@ -24,6 +24,13 @@ void andReg(FILE* execfile, int a, int b);
 void orReg(FILE* execfile, int a, int b);
 void xorReg(FILE* execfile, int a, int b);
 
+void eqReg(FILE* execfile, int a, int b, int dst);
+void neReg(FILE* execfile, int a, int b, int dst);
+void geReg(FILE* execfile, int a, int b, int dst);
+void gtReg(FILE* execfile, int a, int b, int dst);
+void leReg(FILE* execfile, int a, int b, int dst);
+void ltReg(FILE* execfile, int a, int b, int dst);
+
 //Multiplies two registers. The contents are in r0 and r1
 void mulRegs(FILE* execfile, int a, int b);
 

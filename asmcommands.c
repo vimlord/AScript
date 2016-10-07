@@ -1,5 +1,7 @@
 #include "asmcommands.h"
 
+int comparisons = 0;
+
 void writeAsmBlock(FILE* file, char* line) {
     int i = -1;
     while(line[++i]);
@@ -152,18 +154,107 @@ void andReg(FILE* execfile, int a, int b) {
     writeAsmBlock(execfile, cmdline);
 }
 
-void orRegs(FILE* execfile, int a, int b) {
+void orReg(FILE* execfile, int a, int b) {
     char cmdline[64];
     sprintf(cmdline, "or 0x%x, 0x%x\n", a, b);
 
     writeAsmBlock(execfile, cmdline);
 }
 
-void xorRegs(FILE* execfile, int a, int b) {
+void xorReg(FILE* execfile, int a, int b) {
     char cmdline[64];
     sprintf(cmdline, "eor 0x%x, 0x%x\n", a, b);
 
     writeAsmBlock(execfile, cmdline);
 }
 
+void eqReg(FILE* execfile, int a, int b, int dst) {
+    char label[64];
+    sprintf(label, "comp%i", comparisons++);
+
+    //Sets the initial value for if false, then compares
+    loadReg(execfile, dst, "$1"); 
+
+    //Branch if false
+    branchEQ(execfile, a, b, label);
+    loadReg(execfile, dst, "$0");
+    writeAsmBlock(execfile, label);
+    writeAsmBlock(execfile, ":\n");
+
+}
+
+void neReg(FILE* execfile, int a, int b, int dst) {
+    char label[64];
+    sprintf(label, "comp%i", comparisons++);
+
+    //Sets the initial value for if false, then compares
+    loadReg(execfile, dst, "$1"); 
+
+    //Branch if false
+    branchNE(execfile, a, b, label);
+    loadReg(execfile, dst, "$0");
+    writeAsmBlock(execfile, label);
+    writeAsmBlock(execfile, ":\n");
+
+}
+
+void geReg(FILE* execfile, int a, int b, int dst) {
+    char label[64];
+    sprintf(label, "comp%i", comparisons++);
+
+    //Sets the initial value for if false, then compares
+    loadReg(execfile, dst, "$1"); 
+
+    //Branch if false
+    branchGE(execfile, a, b, label);
+    loadReg(execfile, dst, "$0");
+    writeAsmBlock(execfile, label);
+    writeAsmBlock(execfile, ":\n");
+
+}
+
+void gtReg(FILE* execfile, int a, int b, int dst) {
+    char label[64];
+    sprintf(label, "comp%i", comparisons++);
+
+    //Sets the initial value for if false, then compares
+    loadReg(execfile, dst, "$1"); 
+
+    //Branch if false
+    branchGT(execfile, a, b, label);
+    loadReg(execfile, dst, "$0");
+    writeAsmBlock(execfile, label);
+    writeAsmBlock(execfile, ":\n");
+
+}
+
+void leReg(FILE* execfile, int a, int b, int dst) {
+    char label[64];
+    sprintf(label, "comp%i", comparisons++);
+
+    //Sets the initial value for if false, then compares
+    loadReg(execfile, dst, "$1"); 
+
+    //Branch if false
+    branchLE(execfile, a, b, label);
+    loadReg(execfile, dst, "$0");
+    writeAsmBlock(execfile, label);
+    writeAsmBlock(execfile, ":\n");
+
+}
+
+void ltReg(FILE* execfile, int a, int b, int dst) {
+    char label[64];
+    sprintf(label, "comp%i", comparisons++);
+
+    //Sets the initial value for if false, then compares
+    loadReg(execfile, dst, "$1"); 
+
+    //Branch if false
+    branchLT(execfile, a, b, label);
+    loadReg(execfile, dst, "$0");
+    writeAsmBlock(execfile, label);
+    writeAsmBlock(execfile, ":\n");
+
+}
 

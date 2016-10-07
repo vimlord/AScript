@@ -149,9 +149,62 @@ void pemdas(FILE* execfile, char* calc, int dst) {
 
     }
     
+    //OR gate
+    char* partA = contentToOperator(calc, '|', '(', ')');
+    if(strcmp(partA, calc)) {
+
+        //There is an addition operation that can be done
+        
+        char* partB = &calc[strlen(partA) + 1];
+
+        //Compute the two subcomponents
+        pemdas(execfile, partA, dst + 1);
+        pemdas(execfile, partB, dst + 2);
+        
+        //Grab the results
+        copyRegFromMem(execfile, 16, dst + 1); //A
+        copyRegFromMem(execfile, 17, dst + 2); //B
+        
+        //Add, then store.
+        orReg(execfile, 16, 17);
+        copyRegToMem(execfile, dst, 16);
+        
+        int i = 0;
+        while(partA[i]) partA[i++] = '\0';
+        free(partA);
+        
+        return;
+    }
+    
+    //AND gate
+    partA = contentToOperator(calc, '&', '(', ')');
+    if(strcmp(partA, calc)) {
+
+        //There is an addition operation that can be done
+        
+        char* partB = &calc[strlen(partA) + 1];
+
+        //Compute the two subcomponents
+        pemdas(execfile, partA, dst + 1);
+        pemdas(execfile, partB, dst + 2);
+        
+        //Grab the results
+        copyRegFromMem(execfile, 16, dst + 1); //A
+        copyRegFromMem(execfile, 17, dst + 2); //B
+        
+        //Add, then store.
+        andReg(execfile, 16, 17);
+        copyRegToMem(execfile, dst, 16);
+        
+        int i = 0;
+        while(partA[i]) partA[i++] = '\0';
+        free(partA);
+        
+        return;
+    }
     
     //Addition
-    char* partA = contentToOperator(calc, '+', '(', ')');
+    partA = contentToOperator(calc, '+', '(', ')');
     if(strcmp(partA, calc)) {
 
         //There is an addition operation that can be done

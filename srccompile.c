@@ -58,8 +58,6 @@ void parseSegment(FILE* stkfile, FILE* execfile, char* line) {
         while(*front == ';' || *front == ' ')
             front = &front[1];
 
-        printf("LEFT: '%s'\n", front);
-        
         parseLine(stkfile, execfile, nextLine);
 
         writeAsmBlock(execfile, "\n");
@@ -77,8 +75,6 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
     else {
         writeComment(execfile, line);
     }
-
-    printf("LINE: %s\n", line);
 
     //Will test for the index of the first token
     char* tokidx = NULL;
