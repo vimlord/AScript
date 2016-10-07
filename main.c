@@ -2,6 +2,7 @@
 #include "srccompile.h"
 
 #include <errno.h>
+#include <string.h>
 
 char* getCodeBlock(FILE* file) {
     return stringUpTo(file, '}', '{', '}');
@@ -65,15 +66,23 @@ int main(int argc, char* argv[]) {
     
     //The name of the file
     char* FILENAME = argv[1];
+    char* fileext = FILENAME;
+    while(*fileext && *fileext != '.')
+        fileext = &fileext[1];
     
+    if(strcmp(fileext, ".scr")) {
+        printf("Error during compilation: File extension must be .scr\n");
+        return EINVAL;
+    }
+
     //The source file
     FILE* sourceFile = fopen(FILENAME, "r");
     
     //Checks to see if the file exists, and returns an error
     //if the file does not exist.
-    if(sourceFile)
+    if(sourceFile) {
         printf("Compiling %s...\n", FILENAME);
-    else {
+    } else {
         printf("Error during compilation: Input file not found.\n");
         return ENOENT;
     }
@@ -109,12 +118,12 @@ int main(int argc, char* argv[]) {
     //Reopen the swap file, only this time for reading.
     swapFile0 = fopen(".swapspace0.dta", "r");
 
-    printf("Opening dta files for writing...\n");
+    printf("Opening asm file for writing...\n");
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
-    FILE* stkdata = fopen(".stkdata.dta", "w");
-    FILE* execdata = fopen(".execdata.dta", "w");
+    FILE* stkdata = NULL;//fopen("stkdata.dta", "w");
+    FILE* execdata = fopen("program.asm", "w");
     
     int i = 0;
     nextLine = getNextLine(swapFile0);
@@ -126,11 +135,15 @@ int main(int argc, char* argv[]) {
          
         nextLine = getNextLine(swapFile0);
     }
+    
+    printf("Finalizing...\n");
+
+    fclose(swapFile0);
 
     //Final cleanup
     remove(".swapspace0.dta");
 
-
+    fclose(execdata);
 
 }
 

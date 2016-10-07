@@ -25,7 +25,7 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
     static int vars = 0;
     
     //A buffer that holds the next line(s) of assembly. 
-
+    
     addToList(getVars(), varname);
     
     /*
@@ -89,7 +89,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         if(tokidx == line) {
 
             processToken(stkfile, execfile, TOKENS[i],
-                         &tokidx[1 + strlen(TOKENS[i])]);
+                         &tokidx[strlen(TOKENS[i])]);
             //Nothing else needs to be done; return.
 
             return;
@@ -105,7 +105,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         
         if((tokidx = strstr(line, varname))) {
             //The variable is in the string
-            
+
             int idx = (int) strlen(varname);
             int memAddrs = 0x0100 + listSize(getVars());
 
@@ -117,6 +117,8 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
             //Copies value into slot
             copyRegFromMem(execfile, 0x10, memAddrs);
             copyRegToMem(execfile, 0x0100 + i, 0x10);
+
+            return;
         }
         
         i++;
@@ -127,7 +129,17 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
     
     static int tokenid = -1;
-    tokenid++;
+    
+    if(*subline == ' ') {
+        int i = 0;
+        while(subline[i] == ' ')
+            i++;
+        
+        processToken(stkfile, execfile, tok, &subline[i]);
+        return;
+    } else {
+        tokenid++;
+    }
 
     if(compTok(tok, "byte") == 0) {
  
@@ -168,6 +180,8 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         
     } else if(compTok(tok, "if") == 0) {
         
+        printf("%s\n", subline);
+
         //Get the if condition
         int len = 0;
         while(subline[len] != '(') len++;
