@@ -168,7 +168,7 @@ void xorReg(FILE* execfile, int a, int b) {
     writeAsmBlock(execfile, cmdline);
 }
 
-void eqReg(FILE* execfile, int a, int b, int dst) {
+void eqBool(FILE* execfile, int a, int b, int dst) {
     char label[64];
     sprintf(label, "comp%i", comparisons++);
 
@@ -183,7 +183,7 @@ void eqReg(FILE* execfile, int a, int b, int dst) {
 
 }
 
-void neReg(FILE* execfile, int a, int b, int dst) {
+void neBool(FILE* execfile, int a, int b, int dst) {
     char label[64];
     sprintf(label, "comp%i", comparisons++);
 
@@ -198,7 +198,7 @@ void neReg(FILE* execfile, int a, int b, int dst) {
 
 }
 
-void geReg(FILE* execfile, int a, int b, int dst) {
+void geBool(FILE* execfile, int a, int b, int dst) {
     char label[64];
     sprintf(label, "comp%i", comparisons++);
 
@@ -213,7 +213,7 @@ void geReg(FILE* execfile, int a, int b, int dst) {
 
 }
 
-void gtReg(FILE* execfile, int a, int b, int dst) {
+void gtBool(FILE* execfile, int a, int b, int dst) {
     char label[64];
     sprintf(label, "comp%i", comparisons++);
 
@@ -228,7 +228,7 @@ void gtReg(FILE* execfile, int a, int b, int dst) {
 
 }
 
-void leReg(FILE* execfile, int a, int b, int dst) {
+void leBool(FILE* execfile, int a, int b, int dst) {
     char label[64];
     sprintf(label, "comp%i", comparisons++);
 
@@ -243,7 +243,7 @@ void leReg(FILE* execfile, int a, int b, int dst) {
 
 }
 
-void ltReg(FILE* execfile, int a, int b, int dst) {
+void ltBool(FILE* execfile, int a, int b, int dst) {
     char label[64];
     sprintf(label, "comp%i", comparisons++);
 

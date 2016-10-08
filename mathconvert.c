@@ -1,6 +1,7 @@
 #include "mathconvert.h"
 
 #include "asmcommands.h"
+#include "pemdas.h"
 #include "srccompile.h"
 
 #include <string.h>
@@ -149,155 +150,44 @@ void pemdas(FILE* execfile, char* calc, int dst) {
 
     }
     
-    //OR gate
-    char* partA = contentToOperator(calc, '|', '(', ')');
-    if(strcmp(partA, calc)) {
+    static char opSymbols[] = "|&+-*";
 
-        //There is an addition operation that can be done
-        
-        char* partB = &calc[strlen(partA) + 1];
+    static MathOperation operations[5] = { bitOrOperation, bitAndOperation, addOperation, subOperation, mulOperation };
+    
+    //Parses through operators
+    i = 0;
+    while(opSymbols[i]) {
+        char* partA = contentToOperator(calc, opSymbols[i], '(', ')');
 
-        //Compute the two subcomponents
-        pemdas(execfile, partA, dst + 1);
-        pemdas(execfile, partB, dst + 2);
+        if(strcmp(partA, calc)) {
+            
+            char* partB = &calc[strlen(partA) + 1];
+            
+            MathOperation mathOp = operations[i];
+
+            mathOp(execfile, partA, partB, dst);
+
+            int j = 0;
+            while(partA[j]) partA[j++] = '\0';
+            free(partA);
         
-        //Grab the results
-        copyRegFromMem(execfile, 16, dst + 1); //A
-        copyRegFromMem(execfile, 17, dst + 2); //B
-        
-        //Add, then store.
-        orReg(execfile, 16, 17);
-        copyRegToMem(execfile, dst, 16);
-        
-        int i = 0;
-        while(partA[i]) partA[i++] = '\0';
-        free(partA);
-        
-        return;
+            return;
+        } else {
+            int j = 0;
+            while(partA[j]) partA[j++] = '\0';
+            free(partA);
+
+            i++;
+        }
     }
-    
-    //AND gate
-    partA = contentToOperator(calc, '&', '(', ')');
-    if(strcmp(partA, calc)) {
-
-        //There is an addition operation that can be done
-        
-        char* partB = &calc[strlen(partA) + 1];
-
-        //Compute the two subcomponents
-        pemdas(execfile, partA, dst + 1);
-        pemdas(execfile, partB, dst + 2);
-        
-        //Grab the results
-        copyRegFromMem(execfile, 16, dst + 1); //A
-        copyRegFromMem(execfile, 17, dst + 2); //B
-        
-        //Add, then store.
-        andReg(execfile, 16, 17);
-        copyRegToMem(execfile, dst, 16);
-        
-        int i = 0;
-        while(partA[i]) partA[i++] = '\0';
-        free(partA);
-        
-        return;
-    }
-    
-    //Addition
-    partA = contentToOperator(calc, '+', '(', ')');
-    if(strcmp(partA, calc)) {
-
-        //There is an addition operation that can be done
-        
-        char* partB = &calc[strlen(partA) + 1];
-
-        //Compute the two subcomponents
-        pemdas(execfile, partA, dst + 1);
-        pemdas(execfile, partB, dst + 2);
-        
-        //Grab the results
-        copyRegFromMem(execfile, 16, dst + 1); //A
-        copyRegFromMem(execfile, 17, dst + 2); //B
-        
-        //Add, then store.
-        addReg(execfile, 16, 17);
-        copyRegToMem(execfile, dst, 16);
-        
-        int i = 0;
-        while(partA[i]) partA[i++] = '\0';
-        free(partA);
-        
-        return;
-    }
-    
-    free(partA);
-
-    //Subtraction
-    partA = contentToOperator(calc, '-', '(', ')');
-    if(strcmp(partA, calc)) {
-
-        //There is a subtraction operation that can be done
-        
-        char* partB = &calc[strlen(partA) + 1];
-
-        //Compute the two subcomponents
-        pemdas(execfile, partA, dst + 1);
-        pemdas(execfile, partB, dst + 2);
-
-        //Grab the results
-        copyRegFromMem(execfile, 16, dst + 1); //A
-        copyRegFromMem(execfile, 17, dst + 2); //B
-
-        //Add, then store.
-        subReg(execfile, 16, 17);
-        copyRegToMem(execfile, dst, 16);
-         
-        int i = 0;
-        while(partA[i]) partA[i++] = '\0';
-        free(partA);
-        
-        return;
-    }
-    
-    free(partA);
-
-    //Multiplication
-    partA = contentToOperator(calc, '*', '(', ')');
-    if(strcmp(partA, calc)) {
-
-        //There is a multiplication operation that can be done
-        /* MULTIPLICATION IS INCOMPLETE */
-
-        char* partB = &calc[strlen(partA) + 1];
-
-        //Compute the two subcomponents
-        pemdas(execfile, partA, dst + 1);
-        pemdas(execfile, partB, dst + 2);
-
-        //Grab the results
-        copyRegFromMem(execfile, 16, dst + 1); //A
-        copyRegFromMem(execfile, 17, dst + 2); //B
-
-        //Mult, then store.
-        mulRegs(execfile, 16, 17);
-        copyRegToMem(execfile, dst, 0);
-         
-        int i = 0;
-        while(partA[i]) partA[i++] = '\0';
-        free(partA);
-        
-        return;
-    }
-    
-    free(partA);
-    
+   
     if(*calc == '(') {
 
         //There is something in parentheses here.
         char* parcont = parenthesesContent(&calc[1]);
         pemdas(execfile, parcont, dst);
 
-        int i = 0;
+        i = 0;
         while(parcont[i]) parcont[i++] = '\0';
         free(parcont);
 

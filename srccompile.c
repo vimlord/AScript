@@ -245,7 +245,7 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         jumpToLabel(execfile, whileLabel);
         
         //Exit label
-        sprintf(modLabel, "exit%s:\n", whileLabel);
+        sprintf(modLabel, "end%s:\n", whileLabel);
         writeAsmBlock(execfile, modLabel);
         
         free(condition);
