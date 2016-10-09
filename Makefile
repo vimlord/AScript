@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall -Werror --pedantic -g
 
 EXEC = testfile
-OBJS = main.o srccompile.o list.o asmcommands.o mathconvert.o
+OBJS = main.o srccompile.o list.o asmcommands.o mathconvert.o pemdas.o
 
 all: $(OBJS)
 	$(CC) -o $(EXEC) $(OBJS) $(CFLAGS)
