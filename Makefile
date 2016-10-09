@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -Wall -Werror --pedantic -g
 
-EXEC = testfile
+EXEC = ascript 
 OBJS = main.o srccompile.o list.o asmcommands.o mathconvert.o pemdas.o
 
 all: $(OBJS)

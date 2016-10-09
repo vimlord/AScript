@@ -3,6 +3,7 @@
 #include "asmcommands.h"
 #include "mathconvert.h"
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -74,8 +75,9 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         return;
     else {
         writeComment(execfile, line);
+        printf("LINE: '%s'\n", line);
     }
-
+    
     //Will test for the index of the first token
     char* tokidx = NULL;
     
@@ -85,7 +87,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
         //If a token is found, process it.
         tokidx = strstr(line, TOKENS[i]);
-
+        
         if(tokidx == line) {
 
             processToken(stkfile, execfile, TOKENS[i],
@@ -103,7 +105,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
     while(i < len) {
         char* varname = getFromList(VARIABLES, i);
         
-        if((tokidx = strstr(line, varname))) {
+        if((tokidx = strstr(line, varname)) == line) {
             //The variable is in the string
 
             int idx = (int) strlen(varname);
@@ -123,6 +125,10 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         
         i++;
     }
+
+    //If nothing has been chosen at this point, there's a syntax error.
+    printf("Error during compilation: Input file not found.\n");
+    exit(EINVAL);
 
 }
 
