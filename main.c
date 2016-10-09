@@ -15,7 +15,7 @@ char* getNextLine(FILE* file) {
 char* stringUpTo(FILE* file, char c, char up, char down) {
 
     int i = 0, j = 0;
-    char* line = (char*) malloc(sizeof(char));;
+    char* line = (char*) malloc(sizeof(char)); //Creates empty string.
     char* swp;
     char nextChar;
     
@@ -25,7 +25,12 @@ char* stringUpTo(FILE* file, char c, char up, char down) {
 
     if(*line == EOF) return line;
     else while(*line == ' ') *line = fgetc(file);
-
+    
+    /**
+     * Iterates until the end of the file or until the terminator
+     * has been reached, provided that closure has been reached.
+     * A compilable program will have closure on every line.
+     */
     while(line[i] != EOF && (line[i] != c || level)) {
         i++;
         //Read char
@@ -50,7 +55,7 @@ char* stringUpTo(FILE* file, char c, char up, char down) {
         line = swp;
     }
 
-    line[i] = '\0';
+    line[i] = '\0'; //Terminates the string.
     
     return line;
 
@@ -122,17 +127,21 @@ int main(int argc, char* argv[]) {
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
-    FILE* stkdata = NULL;//fopen("stkdata.dta", "w");
     FILE* execdata = fopen("program.asm", "w");
     
+    /*
+     * Iterates through each line one by one. The use of parseSegment()
+     * allows for lines containing code segments to be broken down.
+     */
     int i = 0;
     nextLine = getNextLine(swapFile0);
     while(*nextLine != '\0' && *nextLine != EOF) {
         if(i++ > 10) break;
 
         //Parse the current line.
-        parseSegment(stkdata, execdata, nextLine);
-         
+        parseSegment(execdata, nextLine);
+        
+        //Gets the next line
         nextLine = getNextLine(swapFile0);
     }
     

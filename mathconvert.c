@@ -24,13 +24,6 @@ int indexOfClosingChar(char* str, char start, char end) {
     return str[len] ? -1 : len;
 }
 
-/**
- * Gets the content of opening and closing chars
- * str   - The string starting at the char after a
- *         char equal to start
- * start - An opening character
- * end   - A closing character
- */
 char* closureContent(char* str, char start, char end) {
     int len = 0, i = 0;
     while(str[len]) {
@@ -66,10 +59,6 @@ char* bracketContent(char* start) {
     return closureContent(start, '{', '}');
 }
 
-/**
- * Gets everything up until a certain operator, as long as there
- * is closure in the string as definied by the up and down characters
- */
 char* contentToOperator(char* start, char op, char up, char down) {
     int len = 0;
 
@@ -92,37 +81,18 @@ char* contentToOperator(char* start, char op, char up, char down) {
     return result;
 }
 
-int idxOfMathOp(char* str) {
-    int len = 0;
-
-    while(str[len]) {
-        if(str[len] == '+' || str[len] == '*')
-            break;
-        else if(str[len] == '(')
-            len += indexOfClosingChar(&str[len], '(', ')');
-        
-        if(str[len]) len++;
-    }
-
-    return len;
-}
-
 void pemdas(FILE* execfile, char* calc, int dst) {
     
     //printf("%s\n", calc);
 
-    //Get the index of \0
-    int i = 0;
-    while(calc[i] != '\0') i++;
-    
-    
-    if(i == 0) {
-        //Fills the address with 0.
+    if(!(*calc)) {
+        //Fills the address with 0 if the string is empty.
         loadReg(execfile, 16, "$0");
         copyRegToMem(execfile, dst, 16);
         return;
         
     } else if(*calc == ' ') {
+        //If there are leading spaces, remove them and restart
         int i = 1;
         while(calc[i] == ' ') i++;
 
@@ -131,6 +101,10 @@ void pemdas(FILE* execfile, char* calc, int dst) {
         return;
     }
 
+    //Get the index of \0
+    int i = 0;
+    while(calc[i] != '\0') i++;
+     
     //If there are any spaces at the end, remove them. 
     if(calc[i-1] == ' ') {
         i--;
@@ -150,11 +124,11 @@ void pemdas(FILE* execfile, char* calc, int dst) {
 
     }
     
+    //These values are preserved, and are used by the program to properly execute PEMDAS.
     static char opSymbols[] = "|&+-*";
-
     static MathOperation operations[5] = { bitOrOperation, bitAndOperation, addOperation, subOperation, mulOperation };
     
-    //Parses through operators
+    //Parses through operators, and chooses the appropriate operation to run.
     i = 0;
     while(opSymbols[i]) {
         char* partA = contentToOperator(calc, opSymbols[i], '(', ')');
@@ -180,10 +154,9 @@ void pemdas(FILE* execfile, char* calc, int dst) {
             i++;
         }
     }
-   
+    
+    //Drops parentheses if the entire statement is a parenthetical.
     if(*calc == '(') {
-
-        //There is something in parentheses here.
         char* parcont = parenthesesContent(&calc[1]);
         pemdas(execfile, parcont, dst);
 
@@ -194,6 +167,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
         return;
     }
     
+    //Try to find a matching variable.
     List vars = getVars();
     int numVars = listSize(vars);
     
@@ -218,20 +192,20 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     }
     
     //If the program reached this point, then there has to be a scalar here.
-    //It will be stored in var
+    //It will be stored in dst
     loadReg(execfile, 16, calc);
     copyRegToMem(execfile, dst, 16);
 
 }
 
-void jumpIfTrue(FILE* execfile, char* cond, char* label, int stkptr) {
+void jumpIfTrue(FILE* execfile, char* cond, char* label, int ptr) {
      
     writeComment(execfile, "Compute conditional");
-    pemdas(execfile, cond, stkptr);
+    pemdas(execfile, cond, ptr);
     
     writeComment(execfile, "Get values");
     //Copies the value into registers
-    copyRegFromMem(execfile, 0x10, stkptr);
+    copyRegFromMem(execfile, 0x10, ptr);
     loadReg(execfile, 0x11, "$0");
     
     writeComment(execfile, "Branch if nonzero");
@@ -241,14 +215,14 @@ void jumpIfTrue(FILE* execfile, char* cond, char* label, int stkptr) {
 
 }
 
-void jumpIfFalse(FILE* execfile, char* cond, char* label, int stkptr) {
+void jumpIfFalse(FILE* execfile, char* cond, char* label, int ptr) {
     
     writeComment(execfile, "Compute conditional");
-    pemdas(execfile, cond, stkptr);
+    pemdas(execfile, cond, ptr);
     
     writeComment(execfile, "Get values");
     //Copies the value into registers
-    copyRegFromMem(execfile, 0x10, stkptr);
+    copyRegFromMem(execfile, 0x10, ptr);
     loadReg(execfile, 0x11, "$0");
     
     writeComment(execfile, "Branch if zero");

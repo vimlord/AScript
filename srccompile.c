@@ -21,7 +21,18 @@ int compTok(CMP_TOK a, CMP_TOK b) {
     return strcmp(a, b);
 }
 
-int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
+
+/**
+ * Adds a variable to the heap.
+ *
+ * execfile - The file containing the instructions.
+ * type     - The type of variable being added.
+ * val      - The initial value.
+ * varname  - The name of the variable.
+ *
+ * Returns the address of the variable in memory.
+ */
+int addVariable(FILE* execfile, CMP_TOK type, char* varname) {
 
     static int vars = 0;
     
@@ -41,26 +52,28 @@ int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname) {
     return vars++; 
 
 }
-
-void parseSegment(FILE* stkfile, FILE* execfile, char* line) {
+void parseSegment(FILE* execfile, char* code) {
     char* nextLine = NULL;
-    char* front = line;
+    char* front = code;
     
+    //Stores the layer depth of the program.
     static int depth = 0;
 
     depth++;
 
     while(*front) {
         
-        //Parse the next line.
+        //Parse the next line (should have closure).
         nextLine = contentToOperator(front, ';', '{', '}');
-         
+        
+        //Ensures that there are no leading spaces
         front = &front[strlen(nextLine)]; 
         while(*front == ';' || *front == ' ')
             front = &front[1];
+        
+        parseLine(execfile, nextLine);
 
-        parseLine(stkfile, execfile, nextLine);
-
+        //Adds a newline for readability.
         writeAsmBlock(execfile, "\n");
 
     }
@@ -69,7 +82,7 @@ void parseSegment(FILE* stkfile, FILE* execfile, char* line) {
 
 }
 
-void parseLine(FILE* stkfile, FILE* execfile, char* line) {
+void parseLine(FILE* execfile, char* line) {
     
     if(!(*line))
         return;
@@ -90,7 +103,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
         
         if(tokidx == line) {
 
-            processToken(stkfile, execfile, TOKENS[i],
+            processToken(execfile, TOKENS[i],
                          &tokidx[strlen(TOKENS[i])]);
             //Nothing else needs to be done; return.
 
@@ -132,7 +145,7 @@ void parseLine(FILE* stkfile, FILE* execfile, char* line) {
 
 }
 
-void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
+void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
     
     static int tokenid = -1;
     
@@ -141,7 +154,7 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         while(subline[i] == ' ')
             i++;
         
-        processToken(stkfile, execfile, tok, &subline[i]);
+        processToken(execfile, tok, &subline[i]);
         return;
     } else {
         tokenid++;
@@ -165,7 +178,7 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         //printf("Going to add.\n");
 
         //Adds the variable.
-        addStackFrameVar(execfile, tok, 0, varname);
+        addVariable(execfile, tok, varname);
 
         //The memory address of the new variable.
         int valIdx = 0x0100 + listSize(getVars()) - 1;
@@ -205,7 +218,7 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         while(subline[len] != '{') len++;
         char* function = closureContent(&subline[len+1], '{', '}');
         
-        parseSegment(stkfile, execfile, function);
+        parseSegment(execfile, function);
 
         char modLabel[64];
         sprintf(modLabel, "%s:\n", elseLabel);
@@ -245,7 +258,7 @@ void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline) {
         char* function = closureContent(&subline[len+1], '{', '}');
         
         //Have the segment run
-        parseSegment(stkfile, execfile, function);
+        parseSegment(execfile, function);
 
         //Adds the backwards jump to the start
         jumpToLabel(execfile, whileLabel);

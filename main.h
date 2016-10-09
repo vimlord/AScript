@@ -20,4 +20,22 @@ char* getCodeBlock(FILE* file);
  */
 char* getNextLine(FILE* file);
 
+/**
+ * Gets a section of the file up until the first instance of
+ * a given character that allows for closure.
+ *
+ * file - The file to read from.
+ * c    - The terminating character.
+ * up   - The character of positive closure.
+ * down - The character of negative closure.
+ *
+ * NOTE - The number of occurences of up will be equal to the
+ *        number of occurences of down unless EOF is reached first.
+ * NOTE - A string S with closure is a string such that
+ *            a) The number of characters of positive closure is equal to
+ *               the number of characters of negative closure
+ *            b) For any n <= len(S), the string T consisting of the first
+ *               n characters of S has at least as many positve closure
+ *               characters as negative closure characters.
+ */
 char* stringUpTo(FILE* file, char c, char up, char down);

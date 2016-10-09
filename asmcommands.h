@@ -3,6 +3,13 @@
 void writeAsmBlock(FILE* file, char* line);
 void writeComment(FILE* file, char* comment);
 
+/**
+ * Computes truth statements and branches if true.
+ *
+ * regA - The left hand register for comparison.
+ * regB - The right hand register for comparison.
+ * br   - The label to branch to if true.
+ */
 void branchEQ(FILE* execfile, int regA, int regB, char* br);
 void branchNE(FILE* execfile, int regA, int regB, char* br);
 void branchGE(FILE* execfile, int regA, int regB, char* br);
@@ -12,6 +19,9 @@ void branchLT(FILE* execfile, int regA, int regB, char* br);
 
 void jumpToLabel(FILE* execfile, char* label);
 
+/**
+ * Copies the components of a register into another.
+ */
 void copyReg(FILE* execfile, int dst, int src);
 void copyRegFromMem(FILE* execfile, int dst, int src);
 void copyRegToMem(FILE* execfile, int dst, int src);

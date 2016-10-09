@@ -20,18 +20,25 @@ int compTok(CMP_TOK a, CMP_TOK b);
  *
  * Returns the variable number.
  */
-int addStackFrameVar(FILE* stkfile, CMP_TOK type, int val, char* varname);
+int addVariable(FILE* stkfile, CMP_TOK type, char* varname);
 
-void parseSegment(FILE* stkfile, FILE* execfile, char* code);
+/**
+ * Parses a code snippet into assembly code.
+ *
+ * execfile - The file to which the code will be written.
+ * segment  - The segment that will be parsed.
+ */
+
+void parseSegment(FILE* execfile, char* code);
 
 /**
  * Interprets a line of code and determines what
  * it should do. Makes the necessary changes to
  * the stack frame.
  */
-void parseLine(FILE* stkfile, FILE* execfile, char* line);
+void parseLine(FILE* execfile, char* line);
 
-void processToken(FILE* stkfile, FILE* execfile, CMP_TOK tok, char* subline);
+void processToken(FILE* execfile, CMP_TOK tok, char* subline);
 
 
 #endif
