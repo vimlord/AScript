@@ -88,7 +88,6 @@ void parseLine(FILE* execfile, char* line) {
         return;
     else {
         writeComment(execfile, line);
-        printf("LINE: '%s'\n", line);
     }
     
     //Will test for the index of the first token

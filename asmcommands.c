@@ -258,3 +258,20 @@ void ltBool(FILE* execfile, int a, int b, int dst) {
 
 }
 
+void stackPush(FILE* execfile, int reg) {
+    char scratch[64];
+
+    sprintf(scratch, "push $%x\n", reg);
+    writeAsmBlock(execfile, scratch);
+    
+}
+
+void stackPop(FILE* execfile, int reg) {
+    char scratch[64];
+
+    sprintf(scratch, "pop $%x\n", reg);
+    writeAsmBlock(execfile, scratch);
+
+}
+
+

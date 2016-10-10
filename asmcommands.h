@@ -30,6 +30,9 @@ void loadReg(FILE* execfile, int r, char* v);
 void addReg(FILE* execfile, int a, int b);
 void subReg(FILE* execfile, int a, int b);
 
+//Multiplies two registers. The contents are in r0 and r1
+void mulRegs(FILE* execfile, int a, int b);
+
 void andReg(FILE* execfile, int a, int b);
 void orReg(FILE* execfile, int a, int b);
 void xorReg(FILE* execfile, int a, int b);
@@ -41,7 +44,8 @@ void gtBool(FILE* execfile, int a, int b, int dst);
 void leBool(FILE* execfile, int a, int b, int dst);
 void ltBool(FILE* execfile, int a, int b, int dst);
 
-//Multiplies two registers. The contents are in r0 and r1
-void mulRegs(FILE* execfile, int a, int b);
+//Stack push and pop
+void stackPush(FILE* execfile, int reg);
+void stackPop(FILE* execfile, int reg);
 
 
