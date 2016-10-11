@@ -1,3 +1,5 @@
+
+#include <errno.h>
 #include <stdio.h>
 
 void writeAsmBlock(FILE* file, char* line);

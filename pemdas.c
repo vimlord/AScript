@@ -107,6 +107,8 @@ void boolEqOperation(FILE* execfile, char* partA, char* partB, int dst) {
     
     if(*partB != '=') {
         //Bad input
+        printf("Error during compilation: Invalid use of arithmetic operators.\n");
+        exit(EINVAL);
     }
 
     //Compute the two subcomponents

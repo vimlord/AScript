@@ -3,7 +3,6 @@
 #include "asmcommands.h"
 #include "mathconvert.h"
 
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -217,8 +216,6 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         while(subline[len] != '{') len++;
 
         char* function = closureContent(&subline[len+1], '{', '}');
-        
-        printf("'%s'\n", function);
 
         parseSegment(execfile, function);
         
@@ -236,8 +233,6 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         sprintf(modlabel, "%s:\n", elseLabel);       
         writeAsmBlock(execfile, modlabel);
         
-        printf("'%s'\n", elseFunction);
-
         if(strstr(elseFunction, "else") == elseFunction) {
             elseFunction = &elseFunction[4];
             while(*elseFunction == ' ') elseFunction = &elseFunction[1];
