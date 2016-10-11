@@ -139,15 +139,16 @@ void parseLine(FILE* execfile, char* line) {
     }
 
     //If nothing has been chosen at this point, there's a syntax error.
-    printf("Error during compilation: Input file not found.\n");
+    printf("Error during compilation: Unable to find token or variable.\n");
     exit(EINVAL);
 
 }
 
 void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
     
-    static int tokenid = -1;
-    
+    static int TOKEN_ID = 0;
+    int tokenid = -1;
+
     if(*subline == ' ') {
         int i = 0;
         while(subline[i] == ' ')
@@ -156,7 +157,7 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         processToken(execfile, tok, &subline[i]);
         return;
     } else {
-        tokenid++;
+        tokenid = TOKEN_ID++;
     }
 
     if(compTok(tok, "byte") == 0) {
@@ -198,8 +199,6 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         
     } else if(compTok(tok, "if") == 0) {
         
-        printf("%s\n", subline);
-
         //Get the if condition
         int len = 0;
         while(subline[len] != '(') len++;
@@ -213,15 +212,47 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
        
         jumpIfFalse(execfile, condition, elseLabel, 0x0100 + listSize(getVars()));
         
+        //Otherwise, execute
         //Gets the code block to run
         while(subline[len] != '{') len++;
+
         char* function = closureContent(&subline[len+1], '{', '}');
         
-        parseSegment(execfile, function);
+        printf("'%s'\n", function);
 
-        char modLabel[64];
-        sprintf(modLabel, "%s:\n", elseLabel);
-        writeAsmBlock(execfile, modLabel);
+        parseSegment(execfile, function);
+        
+        //Generate the alternate function
+        char* elseFunction = &subline[len+2] + strlen(function);
+        while(*elseFunction == ' ') elseFunction = &elseFunction[1];
+
+        char modlabel[64];
+        
+        //Jumps out of the if loop
+        sprintf(modlabel, "endif%i", tokenid);
+        jumpToLabel(execfile, modlabel);
+
+        //Place the else label
+        sprintf(modlabel, "%s:\n", elseLabel);       
+        writeAsmBlock(execfile, modlabel);
+        
+        printf("'%s'\n", elseFunction);
+
+        if(strstr(elseFunction, "else") == elseFunction) {
+            elseFunction = &elseFunction[4];
+            while(*elseFunction == ' ') elseFunction = &elseFunction[1];
+            if(*elseFunction == '{') {
+                //The else is a block
+                char* elseBlock = closureContent(&elseFunction[1], '{', '}');
+                parseSegment(execfile, elseBlock);
+                free(elseBlock);
+            } else {
+                parseSegment(execfile, elseFunction); 
+            }
+        }
+        
+        sprintf(modlabel, "endif%i:\n", tokenid);
+        writeAsmBlock(execfile, modlabel);
 
         free(condition);
         free(function);
@@ -250,10 +281,11 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
 
         //If false, exit the loop
         jumpIfFalse(execfile, condition, endWhileLabel, 0x0100 + listSize(getVars()));
-
+        
         //Otherwise, execute
         //Gets the code block to run
         while(subline[len] != '{') len++;
+
         char* function = closureContent(&subline[len+1], '{', '}');
         
         //Have the segment run
