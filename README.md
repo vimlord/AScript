@@ -22,16 +22,16 @@ byte if;
 
 are all extremely terrible things that you should not do in any program.
 
-####Loops
+####Conditionals
 
-AScript allows for for loops and while loops. Both must be terminated with a semicolon when present.
+AScript allows for if-else statements and while loops. Both must be terminated with a semicolon when present.
 
 ```
 byte factorial = 1;
-byte n = 6;
-while(i) {
+byte n = 2;
+while(n <= 6) {
     factorial = factorial * n;
-    n = n - 1;
+    n = n + 1;
 };
 ```
 
@@ -41,14 +41,16 @@ This code snippet will iterate and compute n!. In the function, n will continuou
 byte input = 6;
 if(input) {
     input = 0;
+} else {
+    input = 1;
 };
 ```
 
-This segment of code takes the value of input and sets it to zero if it is not already zero.
+This segment of code takes the value of input and sets it to zero if it is not already zero. Otherwise, it will set the value equal to 1. In a sense, this statement is equivalent to the ! operation, which negates the truth of a statement.
 
 ####Arithmetic
 
-The compiler is written so that it will have the program run through the correct order of operations. The program will use the same order of operations used by the C family of operations. That is, ```() -> * -> + or - -> & -> |```. Currently, division is not supported, but that and other operations will eventually be supported.
+The compiler is written so that it will have the program run through the correct order of operations. The program will use the same order of operations used by the C family of operations. That is, ```() -> * -> + or - -> < or > -> == or != -> & -> |```. Currently, division is not supported, but that and other operations will eventually be supported.
 
 ##Usage
 
@@ -58,7 +60,13 @@ Currently, there is no available builds of the compiler. However, the compiler s
 make all
 ```
 
-This will compile the source into an executable. Then, run the executable with your sourcefile as a parameter. Note that the source file must be a .scr file. The program will output the result into a .asm file in the current directory as long as it compiled correctly. The asm file can then be used in your IDE of choice.
+This will compile the source into an executable. Then, run the executable with your sourcefile, which must be a .scr file, as a parameter:
+
+```
+./ascript srcfile.scr
+```
+
+Note that the source file must be a .scr file. The program will output the result into a .asm file in the current directory as long as it compiled correctly. The asm file can then be used in your IDE of choice. Compilation can go wrong in several instances. For example, if one does not provide a valid input file, the program will indicate this and immediately terminate.
 
 ##Future
 
