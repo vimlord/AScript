@@ -19,7 +19,7 @@ char* stringUpTo(FILE* file, char c, char up, char down) {
     char* swp;
     char nextChar;
     
-    int level = 0;
+    int level = 0; //Closure level. Closure can be reached when level == 0
 
     *line = fgetc(file);
 

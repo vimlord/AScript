@@ -120,15 +120,15 @@ void parseLine(FILE* execfile, char* line) {
             //The variable is in the string
 
             int idx = (int) strlen(varname);
-            int memAddrs = 0x0100 + listSize(getVars());
+            //int memAddrs = 0x0100 + listSize(getVars());
 
             //By default, no equals sign means that the value will be set to 0.
             while(tokidx[idx] && tokidx[idx] != '=') idx++;
              
-            pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0", memAddrs);
+            pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0");
             
             //Copies value into slot
-            copyRegFromMem(execfile, 0x10, memAddrs);
+            stackPop(execfile, 0x10);
             copyRegToMem(execfile, 0x0100 + i, 0x10);
 
             return;
@@ -180,7 +180,7 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         addVariable(execfile, tok, varname);
 
         //The memory address of the new variable.
-        int valIdx = 0x0100 + listSize(getVars()) - 1;
+        //int valIdx = 0x0100 + listSize(getVars()) - 1;
         
         //If followed by an equal sign, include a definition for the variable.
         while(subline[i] == ' ') i++;
@@ -190,10 +190,10 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
             //Since the variable is in the end slot, we can have
             //pemdas() push the values directly there.
 
-            pemdas(execfile, subline[i+1] ? &subline[i+1] : "0", valIdx);
+            pemdas(execfile, subline[i+1] ? &subline[i+1] : "0");
             
         } else {
-            pemdas(execfile, "0", valIdx); 
+            pemdas(execfile, "0"); 
         }
         
     } else if(compTok(tok, "if") == 0) {
@@ -209,7 +209,7 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         char elseLabel[64];
         sprintf(elseLabel, "else%i", tokenid);
        
-        jumpIfFalse(execfile, condition, elseLabel, 0x0100 + listSize(getVars()));
+        jumpIfFalse(execfile, condition, elseLabel);
         
         //Otherwise, execute
         //Gets the code block to run
@@ -275,7 +275,7 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         sprintf(endWhileLabel, "end%s", whileLabel);
 
         //If false, exit the loop
-        jumpIfFalse(execfile, condition, endWhileLabel, 0x0100 + listSize(getVars()));
+        jumpIfFalse(execfile, condition, endWhileLabel);
         
         //Otherwise, execute
         //Gets the code block to run

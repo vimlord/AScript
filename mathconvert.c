@@ -81,14 +81,14 @@ char* contentToOperator(char* start, char op, char up, char down) {
     return result;
 }
 
-void pemdas(FILE* execfile, char* calc, int dst) {
+void pemdas(FILE* execfile, char* calc) {
     
     //printf("%s\n", calc);
 
     if(!(*calc)) {
         //Fills the address with 0 if the string is empty.
         loadReg(execfile, 16, "$0");
-        copyRegToMem(execfile, dst, 16);
+        stackPush(execfile, 16);
         return;
         
     } else if(*calc == ' ') {
@@ -96,7 +96,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
         int i = 1;
         while(calc[i] == ' ') i++;
 
-        pemdas(execfile, &calc[i], dst);
+        pemdas(execfile, &calc[i]);
         
         return;
     }
@@ -118,7 +118,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
         }
         newCalc[j] = '\0';
         
-        pemdas(execfile, newCalc, dst);
+        pemdas(execfile, newCalc);
 
         return;
 
@@ -151,7 +151,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
             
             MathOperation mathOp = operations[i];
 
-            mathOp(execfile, partA, partB, dst);
+            mathOp(execfile, partA, partB);
 
             int j = 0;
             while(partA[j]) partA[j++] = '\0';
@@ -170,7 +170,7 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     //Drops parentheses if the entire statement is a parenthetical.
     if(*calc == '(') {
         char* parcont = parenthesesContent(&calc[1]);
-        pemdas(execfile, parcont, dst);
+        pemdas(execfile, parcont);
 
         i = 0;
         while(parcont[i]) parcont[i++] = '\0';
@@ -196,8 +196,8 @@ void pemdas(FILE* execfile, char* calc, int dst) {
              * The variable will be at 0x0100 + i
              */
             copyRegFromMem(execfile, 16, 0x0100 + i);
-            copyRegToMem(execfile, dst, 16);
-            
+            stackPush(execfile, 16);
+
             return;
         } else i++;
 
@@ -206,20 +206,19 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     //If the program reached this point, then there has to be a scalar here.
     //It will be stored in dst
     loadReg(execfile, 16, calc);
-    copyRegToMem(execfile, dst, 16);
-
+    stackPush(execfile, 16);
 }
 
-void jumpIfTrue(FILE* execfile, char* cond, char* label, int ptr) {
+void jumpIfTrue(FILE* execfile, char* cond, char* label) {
      
     writeComment(execfile, "Compute conditional");
-    pemdas(execfile, cond, ptr);
+    pemdas(execfile, cond);
     
     writeComment(execfile, "Get values");
     //Copies the value into registers
-    copyRegFromMem(execfile, 0x10, ptr);
-    loadReg(execfile, 0x11, "$0");
-    
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     writeComment(execfile, "Branch if nonzero");
     //Branches if equal to zero (0 is false)
     branchNE(execfile, 0x10, 0x11, label);
@@ -227,15 +226,15 @@ void jumpIfTrue(FILE* execfile, char* cond, char* label, int ptr) {
 
 }
 
-void jumpIfFalse(FILE* execfile, char* cond, char* label, int ptr) {
+void jumpIfFalse(FILE* execfile, char* cond, char* label) {
     
     writeComment(execfile, "Compute conditional");
-    pemdas(execfile, cond, ptr);
+    pemdas(execfile, cond);
     
     writeComment(execfile, "Get values");
     //Copies the value into registers
-    copyRegFromMem(execfile, 0x10, ptr);
-    loadReg(execfile, 0x11, "$0");
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
     
     writeComment(execfile, "Branch if zero");
     //Branches if equal to zero (0 is false)

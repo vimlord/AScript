@@ -3,25 +3,25 @@
 
 #include "mathconvert.h"
 
-typedef void (*MathOperation)(FILE*, char*, char*, int);
+typedef void (*MathOperation)(FILE*, char*, char*);
 
 //Standard PEMDAS operations
-void addOperation(FILE* execfile, char* partA, char* partB, int dst);
-void subOperation(FILE* execfile, char* partA, char* partB, int dst);
-void mulOperation(FILE* execfile, char* partA, char* partB, int dst);
+void addOperation(FILE* execfile, char* partA, char* partB);
+void subOperation(FILE* execfile, char* partA, char* partB);
+void mulOperation(FILE* execfile, char* partA, char* partB);
 
 //Bitwise boolean expressions.
-void bitAndOperation(FILE* execfile, char* partA, char* partB, int dst);
-void bitOrOperation(FILE* execfile, char* partA, char* partB, int dst);
-void bitXorOperation(FILE* execfile, char* partA, char* partB, int dst);
+void bitAndOperation(FILE* execfile, char* partA, char* partB);
+void bitOrOperation(FILE* execfile, char* partA, char* partB);
+void bitXorOperation(FILE* execfile, char* partA, char* partB);
 
 //Comparison
-void boolEqOperation(FILE* execfile, char* partA, char* partB, int dst);
-void boolNeOperation(FILE* execfile, char* partA, char* partB, int dst);
-void boolGeOperation(FILE* execfile, char* partA, char* partB, int dst);
-void boolGtOperation(FILE* execfile, char* partA, char* partB, int dst);
-void boolLeOperation(FILE* execfile, char* partA, char* partB, int dst);
-void boolLtOperation(FILE* execfile, char* partA, char* partB, int dst);
+void boolEqOperation(FILE* execfile, char* partA, char* partB);
+void boolNeOperation(FILE* execfile, char* partA, char* partB);
+void boolGeOperation(FILE* execfile, char* partA, char* partB);
+void boolGtOperation(FILE* execfile, char* partA, char* partB);
+void boolLeOperation(FILE* execfile, char* partA, char* partB);
+void boolLtOperation(FILE* execfile, char* partA, char* partB);
 
 #endif
 

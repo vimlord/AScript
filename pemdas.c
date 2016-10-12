@@ -6,104 +6,101 @@
 #include <string.h>
 #include <stdlib.h>
 
-void addOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void addOperation(FILE* execfile, char* partA, char* partB) {
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
     
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
-    
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     //Add, then store.
     addReg(execfile, 16, 17);
-    copyRegToMem(execfile, dst, 16);
-        
+    stackPush(execfile, 16);
+
 }
 
 
-void subOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void subOperation(FILE* execfile, char* partA, char* partB) {
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
     
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
-    
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     //Add, then store.
     subReg(execfile, 16, 17);
-    copyRegToMem(execfile, dst, 16);
-        
+    stackPush(execfile, 16);
+
 }
 
 
-void mulOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void mulOperation(FILE* execfile, char* partA, char* partB) {
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
 
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
 
     //Mult, then store.
     mulRegs(execfile, 16, 17);
-    copyRegToMem(execfile, dst, 0);
-
+    stackPush(execfile, 0);
 }
 
-void bitAndOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void bitAndOperation(FILE* execfile, char* partA, char* partB) {
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
-        
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
+
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
-        
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     //Add, then store.
     andReg(execfile, 16, 17);
-    copyRegToMem(execfile, dst, 16);
-
+    stackPush(execfile, 16);
 }
 
-void bitOrOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void bitOrOperation(FILE* execfile, char* partA, char* partB) {
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
-        
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
+
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
-        
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     //Add, then store.
     orReg(execfile, 16, 17);
-    copyRegToMem(execfile, dst, 16);
-
+    stackPush(execfile, 16);
 }
-void bitXorOperation(FILE* execfile, char* partA, char* partB, int dst) {
-
+void bitXorOperation(FILE* execfile, char* partA, char* partB) {
+    
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
         
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
-        
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     //Add, then store.
     xorReg(execfile, 16, 17);
-    copyRegToMem(execfile, dst, 16);
+    stackPush(execfile, 16);
 
 }
 
-void boolEqOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void boolEqOperation(FILE* execfile, char* partA, char* partB) {
     
     if(*partB != '=') {
         //Bad input
@@ -112,114 +109,109 @@ void boolEqOperation(FILE* execfile, char* partA, char* partB, int dst) {
     }
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, &partB[1], dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, &partB[1]);
         
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
         
     //Add, then store.
     eqBool(execfile, 16, 17, 18);
-    copyRegToMem(execfile, dst, 18);
-
+    stackPush(execfile, 18);
 }
 
-void boolNeOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void boolNeOperation(FILE* execfile, char* partA, char* partB) {
     
     if(*partB != '=') {
         //Something like computing !x
-        boolEqOperation(execfile, partA, partB, dst);
+        boolEqOperation(execfile, partA, partB);
 
         return;
     }
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, &partB[1], dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, &partB[1]);
         
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
         
     //Add, then store.
     neBool(execfile, 16, 17, 18);
-    copyRegToMem(execfile, dst, 18);
-
+    stackPush(execfile, 18);
 }
 
-void boolGeOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void boolGeOperation(FILE* execfile, char* partA, char* partB) {
     
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
         
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
-        
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     //Add, then store.
     geBool(execfile, 16, 17, 18);
-    copyRegToMem(execfile, dst, 18);
-
+    stackPush(execfile, 18);
 }
 
-void boolGtOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void boolGtOperation(FILE* execfile, char* partA, char* partB) {
     
     if(*partB == '=') {
-        boolGeOperation(execfile, partA, &partB[1], dst);
+        boolGeOperation(execfile, partA, &partB[1]);
         return;
     }
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
         
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
         
     //Add, then store.
     gtBool(execfile, 16, 17, 18);
-    copyRegToMem(execfile, dst, 18);
+    stackPush(execfile, 18);
 
 }
 
-void boolLeOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void boolLeOperation(FILE* execfile, char* partA, char* partB) {
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
         
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
-        
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
+
     //Add, then store.
     leBool(execfile, 16, 17, 18);
-    copyRegToMem(execfile, dst, 18);
-
+    stackPush(execfile, 18);
 }
 
-void boolLtOperation(FILE* execfile, char* partA, char* partB, int dst) {
+void boolLtOperation(FILE* execfile, char* partA, char* partB) {
 
     if(*partB == '=') {
-        boolLeOperation(execfile, partA, &partB[1], dst);
+        boolLeOperation(execfile, partA, &partB[1]);
         return;
     }
 
     //Compute the two subcomponents
-    pemdas(execfile, partA, dst + 1);
-    pemdas(execfile, partB, dst + 2);
+    pemdas(execfile, partA);
+    pemdas(execfile, partB);
         
     //Grab the results
-    copyRegFromMem(execfile, 16, dst + 1); //A
-    copyRegFromMem(execfile, 17, dst + 2); //B
+    stackPop(execfile, 17);
+    stackPop(execfile, 16);
         
     //Add, then store.
     ltBool(execfile, 16, 17, 18);
-    copyRegToMem(execfile, dst, 18);
-
+    stackPush(execfile, 18);
 }
 
 

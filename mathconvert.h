@@ -46,7 +46,7 @@ char* contentToOperator(char* start, char op, char up, char down);
  * calc     - A segment of code that contains the formula, which should have closure.
  * dst      - The address in memory where the result will be stored.
  */
-void pemdas(FILE* execfile, char* calc, int dst);
+void pemdas(FILE* execfile, char* calc);
 
 /**
  * Jumps to a label if the value of the conditional is true.
@@ -55,7 +55,7 @@ void pemdas(FILE* execfile, char* calc, int dst);
  * label - The label that will be jumped to on meeting the condition.
  * ptr   - The address where the result of computing cond can safely be stored.
  */
-void jumpIfTrue(FILE* execfile, char* cond, char* label, int ptr);
+void jumpIfTrue(FILE* execfile, char* cond, char* label);
 
 /**
  * Jumps to a label if the value of the conditional is false.
@@ -64,4 +64,4 @@ void jumpIfTrue(FILE* execfile, char* cond, char* label, int ptr);
  * label - The label that will be jumped to on meeting the condition.
  * ptr   - The address where the result of computing cond can safely be stored.
  */
-void jumpIfFalse(FILE* execfile, char* cond, char* label, int ptr);
+void jumpIfFalse(FILE* execfile, char* cond, char* label);
