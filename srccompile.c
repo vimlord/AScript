@@ -180,7 +180,7 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         addVariable(execfile, tok, varname);
 
         //The memory address of the new variable.
-        //int valIdx = 0x0100 + listSize(getVars()) - 1;
+        int valIdx = 0x0100 + listSize(getVars()) - 1;
         
         //If followed by an equal sign, include a definition for the variable.
         while(subline[i] == ' ') i++;
@@ -192,10 +192,13 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
 
             pemdas(execfile, subline[i+1] ? &subline[i+1] : "0");
             
-        } else {
-            pemdas(execfile, "0"); 
-        }
-        
+            stackPop(execfile, 16);
+    
+        } else
+           loadReg(execfile, 16, "$0");
+
+        copyRegToMem(execfile, valIdx, 16);
+                
     } else if(compTok(tok, "if") == 0) {
         
         //Get the if condition

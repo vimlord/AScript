@@ -216,8 +216,8 @@ void jumpIfTrue(FILE* execfile, char* cond, char* label) {
     
     writeComment(execfile, "Get values");
     //Copies the value into registers
-    stackPop(execfile, 17);
     stackPop(execfile, 16);
+    loadReg(execfile, 17, "$0");
 
     writeComment(execfile, "Branch if nonzero");
     //Branches if equal to zero (0 is false)
@@ -233,9 +233,9 @@ void jumpIfFalse(FILE* execfile, char* cond, char* label) {
     
     writeComment(execfile, "Get values");
     //Copies the value into registers
-    stackPop(execfile, 17);
     stackPop(execfile, 16);
-    
+    loadReg(execfile, 17, "$0");
+
     writeComment(execfile, "Branch if zero");
     //Branches if equal to zero (0 is false)
     branchEQ(execfile, 0x10, 0x11, label);
