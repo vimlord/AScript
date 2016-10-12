@@ -19,7 +19,7 @@ void writeComment(FILE* file, char* comment) {
 void branchEQ(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp 0x%x, 0x%x\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
     sprintf(scratch, "breq %s\n", br);
@@ -30,7 +30,7 @@ void branchEQ(FILE* execfile, int regA, int regB, char* br) {
 void branchNE(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp 0x%x, 0x%x\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
     sprintf(scratch, "brne %s\n", br);
@@ -41,7 +41,7 @@ void branchNE(FILE* execfile, int regA, int regB, char* br) {
 void branchGE(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp 0x%x, 0x%x\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
     sprintf(scratch, "brge %s\n", br);
@@ -52,7 +52,7 @@ void branchGE(FILE* execfile, int regA, int regB, char* br) {
 void branchGT(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp 0x%x, 0x%x\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
     sprintf(scratch, "brgt %s\n", br);
@@ -64,7 +64,7 @@ void branchGT(FILE* execfile, int regA, int regB, char* br) {
 void branchLE(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp 0x%x, 0x%x\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
     sprintf(scratch, "brle %s\n", br);
@@ -75,7 +75,7 @@ void branchLE(FILE* execfile, int regA, int regB, char* br) {
 void branchLT(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp 0x%x, 0x%x\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
     sprintf(scratch, "brlt %s\n", br);
@@ -94,7 +94,7 @@ void jumpToLabel(FILE* execfile, char* label) {
 
 void copyReg(FILE* execfile, int dst, int src) {
     char cmdline[64];
-    sprintf(cmdline, "mov $%x, $%x\n", dst, src);
+    sprintf(cmdline, "mov r%i, r%i\n", dst, src);
     
     writeAsmBlock(execfile, cmdline);
 }
@@ -109,61 +109,61 @@ void copyRegFromMem(FILE* execfile, int dst, int src) {
     sprintf(scratch, "ldi zl, $%x\n", zl);
     writeAsmBlock(execfile, scratch);
     
-    sprintf(scratch, "ld 0x%x, z\n", dst);
+    sprintf(scratch, "ld r%i, z\n", dst);
     writeAsmBlock(execfile, scratch);
 }
 
 void copyRegToMem(FILE* execfile, int dst, int src) {
     char scratch[64];
 
-    sprintf(scratch, "sts 0x%x, 0x%x\n", dst, src);
+    sprintf(scratch, "sts 0x%x, r%i\n", dst, src);
     writeAsmBlock(execfile, scratch);
 }
 void loadReg(FILE* execfile, int r, char* v) {
     char cmdline[64];
-    sprintf(cmdline, "ldi 0x%x, %s\n", r, v);
+    sprintf(cmdline, "ldi r%i, %s\n", r, v);
 
     writeAsmBlock(execfile, cmdline);
 }
 
 void addReg(FILE* execfile, int a, int b) {
     char cmdline[64];
-    sprintf(cmdline, "add 0x%x, 0x%x\n", a, b);
+    sprintf(cmdline, "add r%i, r%i\n", a, b);
     
     writeAsmBlock(execfile, cmdline);
 }
 
 void subReg(FILE* execfile, int a, int b) {
     char cmdline[64];
-    sprintf(cmdline, "sub 0x%x, 0x%x\n", a, b);
+    sprintf(cmdline, "sub r%i, r%i\n", a, b);
     
     writeAsmBlock(execfile, cmdline);
 }
 
 void mulRegs(FILE* execfile, int a, int b) {
     char cmdline[64];
-    sprintf(cmdline, "sub 0x%x, 0x%x\n", a, b);
+    sprintf(cmdline, "mul r%i, r%i\n", a, b);
 
     writeAsmBlock(execfile, cmdline);
 }
 
 void andReg(FILE* execfile, int a, int b) {
     char cmdline[64];
-    sprintf(cmdline, "and 0x%x, 0x%x\n", a, b);
+    sprintf(cmdline, "and r%i, r%i\n", a, b);
     
     writeAsmBlock(execfile, cmdline);
 }
 
 void orReg(FILE* execfile, int a, int b) {
     char cmdline[64];
-    sprintf(cmdline, "or 0x%x, 0x%x\n", a, b);
+    sprintf(cmdline, "or r%i, r%i\n", a, b);
 
     writeAsmBlock(execfile, cmdline);
 }
 
 void xorReg(FILE* execfile, int a, int b) {
     char cmdline[64];
-    sprintf(cmdline, "eor 0x%x, 0x%x\n", a, b);
+    sprintf(cmdline, "eor r%i, r%i\n", a, b);
 
     writeAsmBlock(execfile, cmdline);
 }
@@ -261,7 +261,7 @@ void ltBool(FILE* execfile, int a, int b, int dst) {
 void stackPush(FILE* execfile, int reg) {
     char scratch[64];
 
-    sprintf(scratch, "push $%x\n", reg);
+    sprintf(scratch, "push r%i\n", reg);
     writeAsmBlock(execfile, scratch);
     
 }
@@ -269,7 +269,7 @@ void stackPush(FILE* execfile, int reg) {
 void stackPop(FILE* execfile, int reg) {
     char scratch[64];
 
-    sprintf(scratch, "pop $%x\n", reg);
+    sprintf(scratch, "pop r%i\n", reg);
     writeAsmBlock(execfile, scratch);
 
 }

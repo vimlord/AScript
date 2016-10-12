@@ -125,15 +125,15 @@ void pemdas(FILE* execfile, char* calc, int dst) {
     }
     
     //These values are preserved, and are used by the program to properly execute PEMDAS.
-    static char opSymbols[] = "|^&=!<>+-*";
+    static char opSymbols[] = "|^&<>=!+-*";
     static MathOperation operations[10] = {
         bitOrOperation,
         bitXorOperation,
         bitAndOperation,
-        boolEqOperation,
-        boolNeOperation,
         boolLtOperation,
         boolGtOperation,
+        boolEqOperation,
+        boolNeOperation,
         addOperation,
         subOperation,
         mulOperation
