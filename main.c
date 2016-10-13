@@ -64,29 +64,74 @@ char* stringUpTo(FILE* file, char c, char up, char down) {
 int main(int argc, char* argv[]) {
     
     //If no file is provided, immediately exit w/ an error message.
-    if(argc < 2) {
+    
+    char* INPUTNAME = NULL;
+    char* OUTPUTNAME = NULL;
+
+    //Parse through user arguments
+    int i = 1;
+    while(i < argc) {
+        
+        printf("Argument: '%s'\n", argv[i]);
+
+        if(strcmp(argv[i], "-o") == 0) {
+            //The user wishes to specify an output
+            if(!argv[++i]) {
+                printf("Error during compilation: No output file provided.\n");
+                return EINVAL;
+            } else
+                OUTPUTNAME = argv[++i];
+        } else
+            //The value must be an output
+            INPUTNAME = argv[i];
+        
+
+        i++;
+    }
+
+    if(!INPUTNAME) {
+        //No input file.
         printf("Error during compilation: No input file specified.\n");
         return EINVAL;
+    } else if(!OUTPUTNAME) {
+        //Gets the name of the output file, since none is specified.
+        i = 0;
+        while(INPUTNAME[i++] != '.');
+        //Make space and assign values
+        OUTPUTNAME = malloc((i+4) * sizeof(char));
+        i = 0;
+        while((OUTPUTNAME[i] = INPUTNAME[i]) != '.') i++;
+        //Sticks the file extension at the end
+        int j = 0;
+        for(j = 0; j <= 3; j++)
+            OUTPUTNAME[i+j+1] = "asm"[j];
     }
     
-    //The name of the file
-    char* FILENAME = argv[1];
-    char* fileext = FILENAME;
-    while(*fileext && *fileext != '.')
-        fileext = &fileext[1];
+    //Gets the file extensions for error checking
+    char* inputext = INPUTNAME;
+    char* outputext = OUTPUTNAME;
+    while(*inputext && *inputext != '.')
+        inputext = &inputext[1];
+    while(*outputext && *outputext != '.')
+        outputext = &outputext[1];
     
-    if(strcmp(fileext, ".scr")) {
-        printf("Error during compilation: File extension must be .scr\n");
+    if(strcmp(inputext, ".scr")) {
+        printf("Error during compilation: Input file extension must be .scr\n");
+        return EINVAL;
+    } else if(strcmp(outputext, ".asm")) {
+        printf("Error during compilation: Output file extension must be .asm\n");
         return EINVAL;
     }
 
+
+
     //The source file
-    FILE* sourceFile = fopen(FILENAME, "r");
+    FILE* sourceFile = fopen(INPUTNAME, "r");
     
     //Checks to see if the file exists, and returns an error
     //if the file does not exist.
     if(sourceFile) {
-        printf("Compiling %s...\n", FILENAME);
+        printf("Compiling %s...\n", INPUTNAME);
     } else {
         printf("Error during compilation: Input file not found.\n");
         return ENOENT;
@@ -127,13 +172,13 @@ int main(int argc, char* argv[]) {
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
-    FILE* execdata = fopen("program.asm", "w");
+    FILE* execdata = fopen(OUTPUTNAME, "w");
     
     /*
      * Iterates through each line one by one. The use of parseSegment()
      * allows for lines containing code segments to be broken down.
      */
-    int i = 0;
+    i = 0;
     nextLine = getNextLine(swapFile0);
     while(*nextLine != '\0' && *nextLine != EOF) {
         if(i++ > 10) break;
