@@ -31,14 +31,20 @@ int compTok(CMP_TOK a, CMP_TOK b) {
  *
  * Returns the address of the variable in memory.
  */
-int addVariable(FILE* execfile, CMP_TOK type, char* varname) {
+int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
 
     static int vars = 0;
     
+    //The address of the new memory
+    int ptr = vars;
+
     //A buffer that holds the next line(s) of assembly. 
+    int i = 0;
+    while(i++ < nbytes)
+        addToList(getVars(), varname);
     
-    addToList(getVars(), varname);
-    
+    vars += nbytes;
+
     /*
     char varline[128];
     
@@ -48,7 +54,7 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname) {
     writeAsmBlock(stkfile, varline);
     */
 
-    return vars++; 
+    return ptr; 
 
 }
 void parseSegment(FILE* execfile, char* code) {
@@ -177,7 +183,7 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         //printf("Going to add.\n");
 
         //Adds the variable.
-        addVariable(execfile, tok, varname);
+        addVariable(execfile, tok, varname, 1);
 
         //The memory address of the new variable.
         int valIdx = 0x0100 + listSize(getVars()) - 1;

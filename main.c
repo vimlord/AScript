@@ -72,8 +72,6 @@ int main(int argc, char* argv[]) {
     int i = 1;
     while(i < argc) {
         
-        printf("Argument: '%s'\n", argv[i]);
-
         if(strcmp(argv[i], "-o") == 0) {
             //The user wishes to specify an output
             if(!argv[++i]) {

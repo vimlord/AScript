@@ -20,7 +20,7 @@ int compTok(CMP_TOK a, CMP_TOK b);
  *
  * Returns the variable number.
  */
-int addVariable(FILE* stkfile, CMP_TOK type, char* varname);
+int addVariable(FILE* stkfile, CMP_TOK type, char* varname, int nbytes);
 
 /**
  * Parses a code snippet into assembly code.
