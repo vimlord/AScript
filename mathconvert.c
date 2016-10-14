@@ -9,6 +9,7 @@
 
 int indexOfClosingChar(char* str, char start, char end) {
     int len = 0, i = 0;
+    
     while(str[len]) {
         if(str[len] == start)
             i++;
@@ -20,8 +21,8 @@ int indexOfClosingChar(char* str, char start, char end) {
         }
         len++;
     }
-
-    return str[len] ? -1 : len;
+    
+    return len;
 }
 
 char* closureContent(char* str, char start, char end) {
@@ -61,13 +62,15 @@ char* bracketContent(char* start) {
 
 char* contentToOperator(char* start, char op, char up, char down) {
     int len = 0;
-
+    
     while(start[len] != '\0') {
         if(start[len] == op)
             break;
-        else if(start[len] == '(')
-            len += indexOfClosingChar(&start[len], up, down);
-        
+        else if(start[len] == up) {
+            len += indexOfClosingChar(&start[len+1], up, down) + 1;
+        }
+
+        //printf("PARSE: '%s'\n", &start[len]);
         len++;
 
     }
@@ -82,8 +85,6 @@ char* contentToOperator(char* start, char op, char up, char down) {
 }
 
 void pemdas(FILE* execfile, char* calc) {
-    
-    printf("CALC: %s\n", calc);
 
     if(!(*calc)) {
         //Fills the address with 0 if the string is empty.
@@ -205,12 +206,6 @@ void pemdas(FILE* execfile, char* calc) {
         
         if(strcmp(testVar, variableName) == 0) {
             
-            printf("Full name '%s'\n", calc);
-            printf("Will get var val '%s'\n", variableName);
-            if(arrIdxStr) {
-                printf("Index of '%s'\n", arrIdxStr);
-            }
-
             //testVar is the variable we seek.
             
             /*
@@ -218,8 +213,6 @@ void pemdas(FILE* execfile, char* calc) {
              * The variable will be at 0x0100 + i
              */
             if(arrIdxStr) {
-                
-                printf("Reading from array.\n");
 
                 writeComment(execfile, "Getting array index");
                 //The access is done as an array

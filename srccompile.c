@@ -63,7 +63,7 @@ void parseSegment(FILE* execfile, char* code) {
     
     //Stores the layer depth of the program.
     static int depth = 0;
-
+    
     depth++;
 
     while(*front) {
@@ -75,7 +75,7 @@ void parseSegment(FILE* execfile, char* code) {
         front = &front[strlen(nextLine)]; 
         while(*front == ';' || *front == ' ')
             front = &front[1];
-        
+
         parseLine(execfile, nextLine);
 
         //Adds a newline for readability.
@@ -225,8 +225,6 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
             nbytes = 1;
         }
         
-        printf("Var space of %i bytes.\n", nbytes);
-
         int len = 0;
         while(subline[len + i] != ' ' && subline[len + i]) len++;
            
