@@ -83,7 +83,7 @@ char* contentToOperator(char* start, char op, char up, char down) {
 
 void pemdas(FILE* execfile, char* calc) {
     
-    //printf("%s\n", calc);
+    printf("CALC: %s\n", calc);
 
     if(!(*calc)) {
         //Fills the address with 0 if the string is empty.
@@ -183,11 +183,33 @@ void pemdas(FILE* execfile, char* calc) {
     List vars = getVars();
     int numVars = listSize(vars);
     
+
+    //Finds length of the variable name 
+    i = 0;
+    while(calc[i] && calc[i] != ' ' && calc[i] != '[') i++;
+    char* variableName = (char*) malloc((i+1) * sizeof(char));
+    int j = -1;
+    while(++j < i)
+        variableName[j] = calc[j];
+    variableName[i] = '\0';
+
+    //Gets the array index, if there is one
+    char* arrIdxStr = NULL;
+    if(calc[i] == '[')
+        arrIdxStr = closureContent(&calc[i+1], '[', ']');
+
+    //Iterate through all variables
     i = 0;
     while(i < numVars) {
         char* testVar = getFromList(vars, i);
         
-        if(strcmp(testVar, calc) == 0) {
+        if(strcmp(testVar, variableName) == 0) {
+            
+            printf("Full name '%s'\n", calc);
+            printf("Will get var val '%s'\n", variableName);
+            if(arrIdxStr) {
+                printf("Index of '%s'\n", arrIdxStr);
+            }
 
             //testVar is the variable we seek.
             
@@ -195,7 +217,32 @@ void pemdas(FILE* execfile, char* calc) {
              * Copy the register to the destination.
              * The variable will be at 0x0100 + i
              */
-            copyRegFromMem(execfile, 16, 0x0100 + i);
+            if(arrIdxStr) {
+                
+                printf("Reading from array.\n");
+
+                writeComment(execfile, "Getting array index");
+                //The access is done as an array
+                //First, calculate the address
+                char addrBuffer[32];
+                //We will need the zero index
+                sprintf(addrBuffer, "ldi zh, $%x\nldi zl, $%x\n", 1 + (i / 256), i % 256);
+                writeAsmBlock(execfile, addrBuffer);
+                
+                //Then, we calculate the index
+                pemdas(execfile, arrIdxStr);
+                //Next, we pop the value off of the stack
+                stackPop(execfile, 16);
+
+                //Then, we need to add it to the zero memory address
+                addReg(execfile, 0x1f, 0x10);
+                
+                writeComment(execfile, "Reading from array");
+                //Finally, we get the variable and put it in the slot
+                writeAsmBlock(execfile, "ld r16, z\n"); //Pull from memory
+            } else
+                copyRegFromMem(execfile, 16, 0x0100 + i);
+            
             stackPush(execfile, 16);
 
             return;

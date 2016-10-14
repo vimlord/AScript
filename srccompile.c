@@ -121,11 +121,6 @@ void parseLine(FILE* execfile, char* line) {
     //Finds the length of the variable name
     i = 0;
     while(line[i] && line[i] != ' ' && line[i] != '[') i++;
-    char* variable = (char*) malloc((i+1) * sizeof(char));
-    int j = -1;
-    while(++j < i)
-        variable[j] = variable[j];
-    variable[i] = '\0';
 
     //Gets the array index, if there is one
     char* arrIdxStr = NULL;
@@ -175,7 +170,6 @@ void parseLine(FILE* execfile, char* line) {
                 stackPop(execfile, 0x10);
                 copyRegToMem(execfile, 0x0100 + i, 0x10);
             }
-            free(variable);
 
             return;
         }
@@ -231,6 +225,8 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
             nbytes = 1;
         }
         
+        printf("Var space of %i bytes.\n", nbytes);
+
         int len = 0;
         while(subline[len + i] != ' ' && subline[len + i]) len++;
            
