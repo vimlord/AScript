@@ -36,7 +36,7 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     static int vars = 0;
     
     //The address of the new memory
-    int ptr = vars;
+    int ptr = 0x0100 + vars;
 
     //A buffer that holds the next line(s) of assembly. 
     int i = 0;
@@ -117,25 +117,65 @@ void parseLine(FILE* execfile, char* line) {
     }
     
     //Try for variable assignments
+
+    //Finds the length of the variable name
+    i = 0;
+    while(line[i] && line[i] != ' ' && line[i] != '[') i++;
+    char* variable = (char*) malloc((i+1) * sizeof(char));
+    int j = -1;
+    while(++j < i)
+        variable[j] = variable[j];
+    variable[i] = '\0';
+
+    //Gets the array index, if there is one
+    char* arrIdxStr = NULL;
+    if(line[i] == '[')
+        arrIdxStr = closureContent(&line[i+1], '[', ']');
+    
     i = 0;
     int len = listSize(VARIABLES);
     while(i < len) {
         char* varname = getFromList(VARIABLES, i);
-        
+
         if((tokidx = strstr(line, varname)) == line) {
             //The variable is in the string
 
             int idx = (int) strlen(varname);
-            //int memAddrs = 0x0100 + listSize(getVars());
 
             //By default, no equals sign means that the value will be set to 0.
             while(tokidx[idx] && tokidx[idx] != '=') idx++;
              
             pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0");
-            
-            //Copies value into slot
-            stackPop(execfile, 0x10);
-            copyRegToMem(execfile, 0x0100 + i, 0x10);
+            if(arrIdxStr) {
+                writeComment(execfile, "Getting array index");
+                //The access is done as an array
+                //First, calculate the address
+                char addrBuffer[32];
+                //We will need the zero index
+                sprintf(addrBuffer, "ldi zh, $%x\nldi zl, $%x\n", 1 + (i / 256), i % 256);
+                writeAsmBlock(execfile, addrBuffer);
+                
+                //Then, we calculate the index
+                pemdas(execfile, arrIdxStr);
+                //Next, we pop the value off of the stack
+                stackPop(execfile, 16);
+
+                //Then, we need to add it to the zero memory address
+                addReg(execfile, 0x1f, 0x10);
+                
+                writeComment(execfile, "Editing array");
+                //Finally, we get the variable and put it in the slot
+                stackPop(execfile, 0x10);
+                sprintf(addrBuffer, "st z, r16\n");
+                writeAsmBlock(execfile, addrBuffer);
+
+
+            } else {
+                //Copies value into slot
+                stackPop(execfile, 0x10);
+                copyRegToMem(execfile, 0x0100 + i, 0x10);
+            }
+            free(variable);
 
             return;
         }
@@ -166,28 +206,50 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
     }
 
     if(compTok(tok, "byte") == 0) {
- 
-        int len = 0;
-        while(subline[len] != ' ' && subline[len]) len++;
-           
-        //Stores the var name in a variable.
-        char* varname = (char*) malloc((len + 1) * sizeof(char));
         
+        int nbytes = 1; //The size of the list, in bytes (1 * size)
+        int i = 0; //The index of the variable name's first char
+
+        if(*subline == '[') {
+            //Get the variable size from the string
+            char* content = closureContent(&subline[1], '[', ']');
+            nbytes = atoi(content);
+
+            //Free the string
+            i = 0;
+            while(content[i]) {
+                content[i] = '\0';
+                i++;
+            }
+
+            //i should hold the index of the first char in the variable
+            i += 2;
+            while(subline[i] == ' ') i++;
+
+            free(content);
+        } else {
+            nbytes = 1;
+        }
+        
+        int len = 0;
+        while(subline[len + i] != ' ' && subline[len + i]) len++;
+           
+        //Allocates space for the variable name
+        char* varname = (char*) malloc((len+1) * sizeof(char));
+        
+        //Stores the var name in varname.
         varname[len] = '\0';
-        int i = 0;
-        while(i < len) {
-            varname[i] = subline[i];
-            i++;
+        int j = 0;
+        while(j < len) {
+            varname[j] = subline[j+i];
+            j++;
         }
         
         //printf("Going to add.\n");
 
         //Adds the variable.
-        addVariable(execfile, tok, varname, 1);
+        int valIdx = addVariable(execfile, tok, varname, nbytes);
 
-        //The memory address of the new variable.
-        int valIdx = 0x0100 + listSize(getVars()) - 1;
-        
         //If followed by an equal sign, include a definition for the variable.
         while(subline[i] == ' ') i++;
         
@@ -202,8 +264,12 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
     
         } else
            loadReg(execfile, 16, "$0");
+        
+        //This ensures that if there is more than one item, they will all have the same value
+        i = 0;
+        while(i < nbytes)
+            copyRegToMem(execfile, valIdx + i++, 16);
 
-        copyRegToMem(execfile, valIdx, 16);
                 
     } else if(compTok(tok, "if") == 0) {
         
