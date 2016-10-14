@@ -1,0 +1,7 @@
+byte val = 1;
+byte n = 1;
+
+while(n <= 4) {
+    val = val * n;
+    n = n + 1;
+};

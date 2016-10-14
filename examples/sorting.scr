@@ -1,0 +1,33 @@
+byte[8] array;
+array[0] = 1;
+array[1] = 6;
+array[2] = 4;
+array[3] = 2;
+array[4] = 5;
+array[5] = 3;
+array[6] = 8;
+array[7] = 7;
+
+byte i = 0;
+while(i < 8) {
+
+    byte j = i + 1;
+    byte min = i;
+
+    while(j < 8) {
+        byte indJ = array[j];
+
+        if(indJ < array[min]) {
+            min = i;
+        };
+
+        j = j + 1;
+    };
+
+    byte tmp = array[i];
+    array[i] = array[min];
+    array[min] = tmp;
+
+    i = i + 1;
+
+};
