@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
                 printf("Error during compilation: No output file provided.\n");
                 return EINVAL;
             } else
-                OUTPUTNAME = argv[++i];
+                OUTPUTNAME = argv[i];
         } else
             //The value must be an output
             INPUTNAME = argv[i];
