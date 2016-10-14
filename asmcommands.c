@@ -52,10 +52,10 @@ void branchGE(FILE* execfile, int regA, int regB, char* br) {
 void branchGT(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regB, regA);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
-    sprintf(scratch, "brgt %s\n", br);
+    sprintf(scratch, "brlt %s\n", br);
     writeAsmBlock(execfile, scratch);
 
 }
@@ -64,10 +64,10 @@ void branchGT(FILE* execfile, int regA, int regB, char* br) {
 void branchLE(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
+    sprintf(scratch, "cp r%i, r%i\n", regB, regA);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
-    sprintf(scratch, "brle %s\n", br);
+    sprintf(scratch, "brge %s\n", br);
     writeAsmBlock(execfile, scratch);
 
 }
