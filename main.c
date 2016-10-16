@@ -56,7 +56,6 @@ char* stringUpTo(FILE* file, char c, char up, char down) {
     }
 
     line[i] = '\0'; //Terminates the string.
-    
     return line;
 
 }
@@ -176,10 +175,8 @@ int main(int argc, char* argv[]) {
      * Iterates through each line one by one. The use of parseSegment()
      * allows for lines containing code segments to be broken down.
      */
-    i = 0;
     nextLine = getNextLine(swapFile0);
     while(*nextLine != '\0' && *nextLine != EOF) {
-        if(i++ > 10) break;
 
         //Parse the current line.
         parseSegment(execdata, nextLine);
@@ -187,8 +184,11 @@ int main(int argc, char* argv[]) {
         //Gets the next line
         nextLine = getNextLine(swapFile0);
     }
-    
-    printf("Finalizing...\n");
+
+    if(*nextLine == EOF)
+        printf("Finalizing...\n");
+    else
+        printf("Something went wrong: %c\n", *nextLine);
 
     fclose(swapFile0);
 

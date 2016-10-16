@@ -11,9 +11,26 @@ char* TOKENS[] = {"if", "while", "byte", ""};
 
 //A singleton list that holds the program variables
 List VARIABLES = NULL;
+List ADDRESSES = NULL;
 
 List getVars() {
     return VARIABLES ? VARIABLES : (VARIABLES = makeList());
+}
+
+List getStkAddrs() {
+    return ADDRESSES ? ADDRESSES : (ADDRESSES = makeList());
+}
+
+/**
+ * Gets the address of a variable in the stack frame
+ */
+int stackAddressOfVar(char* var) {
+    List list = getVars();
+    int idx = listIndexOf(list, var);
+    if(idx < 0)
+        return -1;
+    else
+        return *((int*) getFromList(list, idx)); 
 }
 
 int compTok(CMP_TOK a, CMP_TOK b) {
@@ -35,15 +52,22 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
 
     static int vars = 0;
     
-    //The address of the new memory
-    int ptr = 0x0100 + vars;
+    loadReg(execfile, 16, "0");
 
+    //The address of the new memory
+    int* ptr = malloc(sizeof(int));
+    *ptr = (vars += nbytes) - 1;
+    addToList(getVars(), varname);
+    addToList(getStkAddrs(), (void*) ptr); 
+  
     //A buffer that holds the next line(s) of assembly. 
+    /*
     int i = 0;
-    while(i++ < nbytes)
-        addToList(getVars(), varname);
+    while(i++ < nbytes) {
+        stackPush(execfile, 16);
+    }*/
     
-    vars += nbytes;
+    writeComment(execfile, "Added var");
 
     /*
     char varline[128];
@@ -54,7 +78,7 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     writeAsmBlock(stkfile, varline);
     */
 
-    return ptr; 
+    return *ptr; 
 
 }
 void parseSegment(FILE* execfile, char* code) {
@@ -88,13 +112,15 @@ void parseSegment(FILE* execfile, char* code) {
 }
 
 void parseLine(FILE* execfile, char* line) {
-    
+     
     if(!(*line))
         return;
     else {
         writeComment(execfile, line);
     }
     
+    //printf("LINE: '%s'\n", line);
+
     //Will test for the index of the first token
     char* tokidx = NULL;
     
@@ -238,11 +264,10 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
             varname[j] = subline[j+i];
             j++;
         }
-        
-        //printf("Going to add.\n");
+        i += len; 
 
         //Adds the variable.
-        int valIdx = addVariable(execfile, tok, varname, nbytes);
+        /*int valIdx = */addVariable(execfile, tok, varname, nbytes);
 
         //If followed by an equal sign, include a definition for the variable.
         while(subline[i] == ' ') i++;
@@ -251,7 +276,7 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
             
             //Since the variable is in the end slot, we can have
             //pemdas() push the values directly there.
-
+            
             pemdas(execfile, subline[i+1] ? &subline[i+1] : "0");
             
             stackPop(execfile, 16);
@@ -261,8 +286,8 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
         
         //This ensures that if there is more than one item, they will all have the same value
         i = 0;
-        while(i < nbytes)
-            copyRegToMem(execfile, valIdx + i++, 16);
+        while(i++ < nbytes)
+            stackPush(execfile, 16);//copyRegToMem(execfile, valIdx + i++, 16);
 
                 
     } else if(compTok(tok, "if") == 0) {
@@ -280,6 +305,8 @@ void processToken(FILE* execfile, CMP_TOK tok, char* subline) {
        
         jumpIfFalse(execfile, condition, elseLabel);
         
+        //writeAsmBlock(execfile, "\n");
+
         //Otherwise, execute
         //Gets the code block to run
         while(subline[len] != '{') len++;

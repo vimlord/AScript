@@ -101,7 +101,7 @@ void pemdas(FILE* execfile, char* calc) {
         
         return;
     }
-
+    
     //Get the index of \0
     int i = 0;
     while(calc[i] != '\0') i++;
@@ -181,9 +181,7 @@ void pemdas(FILE* execfile, char* calc) {
     }
     
     //Try to find a matching variable.
-    List vars = getVars();
-    int numVars = listSize(vars);
-    
+    //List vars = getVars();
 
     //Finds length of the variable name 
     i = 0;
@@ -199,48 +197,34 @@ void pemdas(FILE* execfile, char* calc) {
     if(calc[i] == '[')
         arrIdxStr = closureContent(&calc[i+1], '[', ']');
 
-    //Iterate through all variables
-    i = 0;
-    while(i < numVars) {
-        char* testVar = getFromList(vars, i);
+    //i will hold the index in the stack of the variable
+    i = stackAddressOfVar(variableName);
+
+    if(i >= 0) {
+        //The variable exists on the stack frame
+
+        //Copies the stack pointer to x
+        writeAsmBlock(execfile, "mov xh, sph\nmov xl, spl\n");
+
+        if(arrIdxStr) {
+            writeComment(execfile, "Getting array index");
+            //The access is done as an array
+            
+            //First, we need the index
+            pemdas(execfile, arrIdxStr);
+            //Next, we pop the value off of the stack
+            stackPop(execfile, 16);
+
+            //Then, we need to add it to the zero memory address
+            addReg(execfile, 0x1b, 0x10); //The end result is that x now contains the address of the index
+        }
         
-        if(strcmp(testVar, variableName) == 0) {
-            
-            //testVar is the variable we seek.
-            
-            /*
-             * Copy the register to the destination.
-             * The variable will be at 0x0100 + i
-             */
-            if(arrIdxStr) {
+        //Copies the variable's value from the address in x into r16.
+        writeAsmBlock(execfile, "ld r16, x\n");
 
-                writeComment(execfile, "Getting array index");
-                //The access is done as an array
-                //First, calculate the address
-                char addrBuffer[32];
-                //We will need the zero index
-                sprintf(addrBuffer, "ldi zh, $%x\nldi zl, $%x\n", 1 + (i / 256), i % 256);
-                writeAsmBlock(execfile, addrBuffer);
-                
-                //Then, we calculate the index
-                pemdas(execfile, arrIdxStr);
-                //Next, we pop the value off of the stack
-                stackPop(execfile, 16);
-
-                //Then, we need to add it to the zero memory address
-                addReg(execfile, 0x1f, 0x10);
-                
-                writeComment(execfile, "Reading from array");
-                //Finally, we get the variable and put it in the slot
-                writeAsmBlock(execfile, "ld r16, z\n"); //Pull from memory
-            } else
-                copyRegFromMem(execfile, 16, 0x0100 + i);
-            
-            stackPush(execfile, 16);
-
-            return;
-        } else i++;
-
+        //Then, push the value onto the stack.
+        stackPush(execfile, 16);
+        return;
     }
     
     //If the program reached this point, then there has to be a scalar here.
