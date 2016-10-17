@@ -102,6 +102,8 @@ void pemdas(FILE* execfile, char* calc) {
         return;
     }
     
+    //printf("CALC: %s\n", calc);
+
     //Get the index of \0
     int i = 0;
     while(calc[i] != '\0') i++;
@@ -203,8 +205,14 @@ void pemdas(FILE* execfile, char* calc) {
     if(i >= 0) {
         //The variable exists on the stack frame
 
-        //Copies the stack pointer to x
-        writeAsmBlock(execfile, "mov xh, sph\nmov xl, spl\n");
+        //Copies the stack pointer to y 
+        writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
+        
+        char addrBuffer[64];
+
+        //Gets index on stack
+        sprintf(addrBuffer, "ldi r16, $%x\nsub xl, r16\n", i % 256);
+        writeAsmBlock(execfile, addrBuffer);
 
         if(arrIdxStr) {
             writeComment(execfile, "Getting array index");
@@ -216,11 +224,11 @@ void pemdas(FILE* execfile, char* calc) {
             stackPop(execfile, 16);
 
             //Then, we need to add it to the zero memory address
-            addReg(execfile, 0x1b, 0x10); //The end result is that x now contains the address of the index
+            addReg(execfile, 0x1d, 0x10); //The end result is that y now contains the address of the index
         }
         
-        //Copies the variable's value from the address in x into r16.
-        writeAsmBlock(execfile, "ld r16, x\n");
+        //Copies the variable's value from the address in y into r16.
+        writeAsmBlock(execfile, "ld r16, y\n");
 
         //Then, push the value onto the stack.
         stackPush(execfile, 16);

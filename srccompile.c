@@ -29,8 +29,10 @@ int stackAddressOfVar(char* var) {
     int idx = listIndexOf(list, var);
     if(idx < 0)
         return -1;
-    else
-        return *((int*) getFromList(list, idx)); 
+    else {
+        int* ptr = (int*) getFromList(list, idx);
+        return *ptr;
+    }
 }
 
 int compTok(CMP_TOK a, CMP_TOK b) {
@@ -55,29 +57,14 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     loadReg(execfile, 16, "0");
 
     //The address of the new memory
-    int* ptr = malloc(sizeof(int));
+    int* ptr = (int*) malloc(sizeof(int));
     *ptr = (vars += nbytes) - 1;
+
+    void* voidPtr = (void*) ptr;
+    printf("A: %p\nB: %p\n", (void*) ptr, voidPtr);
     addToList(getVars(), varname);
-    addToList(getStkAddrs(), (void*) ptr); 
-  
-    //A buffer that holds the next line(s) of assembly. 
-    /*
-    int i = 0;
-    while(i++ < nbytes) {
-        stackPush(execfile, 16);
-    }*/
+    addToList(getStkAddrs(), voidPtr); 
     
-    writeComment(execfile, "Added var");
-
-    /*
-    char varline[128];
-    
-    //Defines a variable w/ initial value of 0.
-    sprintf(varline, "ldi r16, 0\nsts 0x%x, r16\n", vars + 0x0100);
-    
-    writeAsmBlock(stkfile, varline);
-    */
-
     return *ptr; 
 
 }
@@ -167,35 +154,46 @@ void parseLine(FILE* execfile, char* line) {
             while(tokidx[idx] && tokidx[idx] != '=') idx++;
              
             pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0");
+            writeComment(execfile, "Getting array index");
+            
+            //The access is done as an array
+            //First, calculate the address
+            char addrBuffer[64];
+            //We will need the zero index of the stack
+            //(x always holds index 0 of the stack)
+            writeAsmBlock(execfile, "ld yh, xh\nld yl, xl\n");
+            //Gets index on stack
+            int stkIdx = stackAddressOfVar(varname);
+            if(stkIdx < 0) {
+                //The variable does not exist on the stack.
+                printf("Error during compilation: A variable was not found.\n");
+                exit(EINVAL);
+            }
+            sprintf(addrBuffer, "ldi r16, $%x\nsub xl, r16\n", stkIdx % 256);
+            writeAsmBlock(execfile, addrBuffer);
+
             if(arrIdxStr) {
-                writeComment(execfile, "Getting array index");
-                //The access is done as an array
-                //First, calculate the address
-                char addrBuffer[32];
-                //We will need the zero index
-                sprintf(addrBuffer, "ldi zh, $%x\nldi zl, $%x\n", 1 + (i / 256), i % 256);
-                writeAsmBlock(execfile, addrBuffer);
-                
                 //Then, we calculate the index
                 pemdas(execfile, arrIdxStr);
                 //Next, we pop the value off of the stack
                 stackPop(execfile, 16);
 
                 //Then, we need to add it to the zero memory address
-                addReg(execfile, 0x1f, 0x10);
-                
-                writeComment(execfile, "Editing array");
-                //Finally, we get the variable and put it in the slot
-                stackPop(execfile, 0x10);
-                sprintf(addrBuffer, "st z, r16\n");
-                writeAsmBlock(execfile, addrBuffer);
+                addReg(execfile, 0x1d, 0x10);
+            } 
+            
+            writeComment(execfile, "Editing array");
+            //Finally, we get the variable and put it in the slot
+            stackPop(execfile, 0x10);
+            sprintf(addrBuffer, "st y, r16\n");
+            writeAsmBlock(execfile, addrBuffer);
 
 
-            } else {
-                //Copies value into slot
-                stackPop(execfile, 0x10);
-                copyRegToMem(execfile, 0x0100 + i, 0x10);
-            }
+        
+            //Copies value into slot
+            stackPop(execfile, 0x10);
+            copyRegToMem(execfile, 0x0100 + i, 0x10);
+            
 
             return;
         }
