@@ -26,11 +26,11 @@ List getStkAddrs() {
  */
 int stackAddressOfVar(char* var) {
     List list = getVars();
-    int idx = listIndexOf(list, var);
+    int idx = listIndexOfStr(list, var);
     if(idx < 0)
         return -1;
     else {
-        int* ptr = (int*) getFromList(list, idx);
+        int* ptr = (int*) getFromList(getStkAddrs(), idx);
         return *ptr;
     }
 }
@@ -60,11 +60,9 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     int* ptr = (int*) malloc(sizeof(int));
     *ptr = (vars += nbytes) - 1;
 
-    void* voidPtr = (void*) ptr;
-    printf("A: %p\nB: %p\n", (void*) ptr, voidPtr);
     addToList(getVars(), varname);
-    addToList(getStkAddrs(), voidPtr); 
-    
+    addToList(getStkAddrs(), ptr);
+
     return *ptr; 
 
 }

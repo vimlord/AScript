@@ -7,7 +7,7 @@ struct node;
 typedef struct node* Node;
 
 struct node {
-    char* val;
+    void* val;
     Node next;
 };
 
@@ -28,7 +28,7 @@ Node makeNode(char* item) {
     return n;
 }
 
-void addToList(List lst, char* val) {
+void addToList(List lst, void* val) {
     if(lst->front == NULL)
         lst->front = makeNode(val);
     else {
@@ -39,7 +39,7 @@ void addToList(List lst, char* val) {
     }
 }
 
-char* getFromList(List lst, int idx) {
+void* getFromList(List lst, int idx) {
     int i = 0;
     Node n = lst->front;
     while(i++ < idx) n = n->next;
@@ -47,12 +47,12 @@ char* getFromList(List lst, int idx) {
     return n->val;
 }
 
-int listIndexOf(List lst, char* str) {
+int listIndexOfStr(List lst, char* str) {
     int idx = 0;
     Node curr = lst->front;
 
     while(curr) {
-        if(strcmp(str, curr->val) == 0)
+        if(strcmp(str, (char*) curr->val) == 0)
             return idx;
 
         curr = curr->next;

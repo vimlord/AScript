@@ -6,9 +6,9 @@ typedef struct linked_list* List;
 
 List makeList();
 
-void addToList(List lst, char* val);
-char* getFromList(List lst, int idx);
-int listIndexOf(List lst, char* str);
+void addToList(List lst, void* val);
+void* getFromList(List lst, int idx);
+int listIndexOfStr(List lst, char* str);
 int listSize(List lst);
 
 #endif
