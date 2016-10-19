@@ -143,16 +143,17 @@ void parseLine(FILE* execfile, char* line) {
     while(i < len) {
         char* varname = getFromList(VARIABLES, i);
 
-        if((tokidx = strstr(line, varname)) == line) {
+        if((tokidx = strstr(line, varname)) == line && strchr("= ", line[strlen(varname)])) {
+
             //The variable is in the string
 
             int idx = (int) strlen(varname);
 
             //By default, no equals sign means that the value will be set to 0.
             while(tokidx[idx] && tokidx[idx] != '=') idx++;
-             
+            writeComment(execfile, "Computing value"); 
             pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0");
-            writeComment(execfile, "Getting array index");
+            writeComment(execfile, "Determining pointer address");
             
             //The access is done as an array
             //First, calculate the address
@@ -167,10 +168,11 @@ void parseLine(FILE* execfile, char* line) {
                 printf("Error during compilation: A variable was not found.\n");
                 exit(EINVAL);
             }
-            sprintf(addrBuffer, "ldi r16, $%x\nsub xl, r16\n", stkIdx % 256);
+            sprintf(addrBuffer, "ldi r16, $%x\nsub yl, r16\n", stkIdx % 256);
             writeAsmBlock(execfile, addrBuffer);
-
+            
             if(arrIdxStr) {
+                writeComment(execfile, "Computing array index");
                 //Then, we calculate the index
                 pemdas(execfile, arrIdxStr);
                 //Next, we pop the value off of the stack
@@ -180,18 +182,12 @@ void parseLine(FILE* execfile, char* line) {
                 addReg(execfile, 0x1d, 0x10);
             } 
             
-            writeComment(execfile, "Editing array");
+            writeComment(execfile, "Storing end result");
+
             //Finally, we get the variable and put it in the slot
             stackPop(execfile, 0x10);
             sprintf(addrBuffer, "st y, r16\n");
             writeAsmBlock(execfile, addrBuffer);
-
-
-        
-            //Copies value into slot
-            stackPop(execfile, 0x10);
-            copyRegToMem(execfile, 0x0100 + i, 0x10);
-            
 
             return;
         }
