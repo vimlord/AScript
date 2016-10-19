@@ -1,9 +1,9 @@
 
 CC = gcc
-CFLAGS = -Wall -Werror --pedantic -g
+CFLAGS = -Wall -Werror --pedantic -g -Iinclude/
 
 EXEC = ascript 
-OBJS = main.o srccompile.o list.o asmcommands.o mathconvert.o pemdas.o
+OBJS = src/main.o src/srccompile.o src/list.o src/asmcommands.o src/mathconvert.o src/pemdas.o
 
 all: $(OBJS)
 	$(CC) -o $(EXEC) $(OBJS) $(CFLAGS)
