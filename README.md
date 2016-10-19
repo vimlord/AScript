@@ -12,7 +12,7 @@ Currently, the only datatype supported is byte. They can be instantiated like so
 byte foo = 12;
 ```
 
-If a variable is not given an initial value, then it will automatically default to 0 in the compiler. It is important to note that one should not name variables after tokens or numbers, since the compiler will treat those cases incorrectly. For example,
+If a variable is not given an initial value, then it will automatically default to 0 in the compiler. Every program should only initialize variables at the start of the program, or outside of any loops. It is important to note that one should not name variables after tokens or numbers, since the compiler will treat those cases incorrectly. For example,
 
 ```
 byte 123;
@@ -20,7 +20,15 @@ byte byte;
 byte if;
 ```
 
-are all extremely terrible things that you should not do in any program.
+are all extremely terrible things that you should not do in any program. One can also create arrays of values. These can be doing the following:
+
+```
+byte[6] byteArray;
+byte i = 4;
+byte j = byteArray[i];
+```
+
+In the segment above, the first line creates an array of length 6. Arrays can only be instantiated with a constant length, meaning that an array cannot be created with a length equal to the result of a computation. However, an array can be accessed based on the result of a computation. In the example, one can access the ith element of an array in order to assign it to a variable. This allows for a user to iterate over a list, which enables actions such as sorting.
 
 ####Conditionals
 
