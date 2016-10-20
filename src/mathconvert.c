@@ -3,86 +3,10 @@
 #include "asmcommands.h"
 #include "pemdas.h"
 #include "srccompile.h"
+#include "strmanip.h"
 
 #include <string.h>
 #include <stdlib.h>
-
-int indexOfClosingChar(char* str, char start, char end) {
-    int len = 0, i = 0;
-    
-    while(str[len]) {
-        if(str[len] == start)
-            i++;
-        else if(str[len] == end) {
-            if(i)
-                i--;
-            else
-                break;
-        }
-        len++;
-    }
-    
-    return len;
-}
-
-char* closureContent(char* str, char start, char end) {
-    int len = 0, i = 0;
-    while(str[len]) {
-        if(str[len] == start)
-            i++;
-        else if(str[len] == end) {
-            if(i)
-                i--;
-            else
-                break;
-        }
-        len++;
-    }
-    
-    //The inveriant is that len is at the end of the content
-    char* result = (char*) malloc((len+1) * sizeof(char));
-    i = 0;
-    while(i < len) {
-        result[i] = str[i];
-        i++;
-    }
-    result[i] = '\0';
-
-    return result;
-
-}
-
-char* parenthesesContent(char* start) {
-    return closureContent(start, '(', ')');
-}
-
-char* bracketContent(char* start) {
-    return closureContent(start, '{', '}');
-}
-
-char* contentToOperator(char* start, char op, char up, char down) {
-    int len = 0;
-    
-    while(start[len] != '\0') {
-        if(start[len] == op)
-            break;
-        else if(start[len] == up) {
-            len += indexOfClosingChar(&start[len+1], up, down) + 1;
-        }
-
-        //printf("PARSE: '%s'\n", &start[len]);
-        len++;
-
-    }
-    
-    char* result = (char*) malloc((len + 1) * sizeof(char));
-    int i = -1;
-    while(++i < len)
-        result[i] = start[i];
-    result[i] = '\0';
-
-    return result;
-}
 
 void pemdas(FILE* execfile, char* calc) {
 

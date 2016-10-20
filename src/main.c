@@ -1,64 +1,11 @@
 #include "main.h"
 #include "srccompile.h"
+#include "strmanip.h"
 
 #include <errno.h>
 #include <string.h>
 
-char* getCodeBlock(FILE* file) {
-    return stringUpTo(file, '}', '{', '}');
-}
 
-char* getNextLine(FILE* file) {
-    return stringUpTo(file, ';', '{', '}');
-}
-
-char* stringUpTo(FILE* file, char c, char up, char down) {
-
-    int i = 0, j = 0;
-    char* line = (char*) malloc(sizeof(char)); //Creates empty string.
-    char* swp;
-    char nextChar;
-    
-    int level = 0; //Closure level. Closure can be reached when level == 0
-
-    *line = fgetc(file);
-
-    if(*line == EOF) return line;
-    else while(*line == ' ') *line = fgetc(file);
-    
-    /**
-     * Iterates until the end of the file or until the terminator
-     * has been reached, provided that closure has been reached.
-     * A compilable program will have closure on every line.
-     */
-    while(line[i] != EOF && (line[i] != c || level)) {
-        i++;
-        //Read char
-        nextChar = fgetc(file);
-
-        if(nextChar == up)
-            level++;
-        if(nextChar == down)
-            level--;
-
-        //Create new memory slot, and put line into it
-        swp = (char*) malloc(i+1 * sizeof(char));
-        j = 0;
-        while(j < i) {
-            swp[j] = line[j];
-            j++;
-        }
-        swp[i] = nextChar;
-        
-        //Reallocate memory and do freeing. 
-        if(line) free(line);
-        line = swp;
-    }
-
-    line[i] = '\0'; //Terminates the string.
-    return line;
-
-}
 
 int main(int argc, char* argv[]) {
     

@@ -2,6 +2,7 @@
 
 #include "asmcommands.h"
 #include "mathconvert.h"
+#include "strmanip.h"
 
 #include <stdlib.h>
 #include <string.h>
