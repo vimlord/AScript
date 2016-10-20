@@ -1,11 +1,10 @@
 #include "main.h"
 #include "srccompile.h"
 #include "strmanip.h"
+#include "asmcommands.h"
 
 #include <errno.h>
 #include <string.h>
-
-
 
 int main(int argc, char* argv[]) {
     
@@ -118,6 +117,15 @@ int main(int argc, char* argv[]) {
     //Hold stack frame data and execution instructions.
     FILE* execdata = fopen(OUTPUTNAME, "w");
     
+    //Default execution data
+    writeComment(execdata, "Sets initial system values");
+    writeAsmBlock(execdata, "ldi sph, high(RAMEND)\n");
+    writeAsmBlock(execdata, "ldi spl, low(RAMEND)\n");
+    writeAsmBlock(execdata, "mov xh, sph\n");
+    writeAsmBlock(execdata, "mov xl, spl\n");
+
+    writeAsmBlock(execdata, "\n");
+
     /*
      * Iterates through each line one by one. The use of parseSegment()
      * allows for lines containing code segments to be broken down.
