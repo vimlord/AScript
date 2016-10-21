@@ -73,19 +73,15 @@ int main(int argc, char* argv[]) {
     
     //Checks to see if the file exists, and returns an error
     //if the file does not exist.
-    if(sourceFile) {
-        printf("Compiling %s...\n", INPUTNAME);
-    } else {
+    if(!sourceFile) {
         printf("Error during compilation: Input file not found.\n");
         return ENOENT;
     }
 
     //Create a swap file for writing
-    printf("Opening swapspace0...\n");
     FILE* swapFile0 = fopen(".swapspace0.dta", "w+");
     
     //Moves the chars to the new file, without the newlines.
-    printf("Morphing source into swapspace0...\n");
     char* nextLine;
     while(*(nextLine = stringUpTo(sourceFile, '\n', '\0', '\0')) != EOF) {
         //Gets the length of the String.
@@ -100,18 +96,13 @@ int main(int argc, char* argv[]) {
     }
 
     
-    printf("Closing source and swapspace0...\n");
     //At this point, .swapspace0.swp contains 
     //the source without newlines.
     fclose(sourceFile); //Source file is no longer needed
     fclose(swapFile0);
-    
-    printf("Opening swapspace0 for reading...\n");
 
     //Reopen the swap file, only this time for reading.
     swapFile0 = fopen(".swapspace0.dta", "r");
-
-    printf("Opening asm file for writing...\n");
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
@@ -139,11 +130,6 @@ int main(int argc, char* argv[]) {
         //Gets the next line
         nextLine = getNextLine(swapFile0);
     }
-
-    if(*nextLine == EOF)
-        printf("Finalizing...\n");
-    else
-        printf("Something went wrong: %c\n", *nextLine);
 
     fclose(swapFile0);
 

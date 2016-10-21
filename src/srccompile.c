@@ -104,7 +104,7 @@ void parseSegment(FILE* execfile, char* code) {
 }
 
 void parseLine(FILE* execfile, char* line) {
-     
+
     if(!(*line))
         return;
     else {
@@ -138,7 +138,16 @@ void parseLine(FILE* execfile, char* line) {
 
     //Finds the length of the variable name
     i = 0;
-    while(line[i] && line[i] != ' ' && line[i] != '[') i++;
+    while(line[i] && line[i] != ' ' && line[i] != '[' && !strchr("= ", line[i])) i++;
+    
+    //Holds the variable name
+    char* variable = malloc((i+1) * sizeof(char));
+    int j = 0;
+    while(j < i) {
+        variable[j] = line[j];
+        j++;
+    }
+    variable[j] = '\0';
 
     //Gets the array index, if there is one
     char* arrIdxStr = NULL;
@@ -149,8 +158,11 @@ void parseLine(FILE* execfile, char* line) {
     int len = listSize(VARIABLES);
     while(i < len) {
         char* varname = getFromList(VARIABLES, i);
-
-        if((tokidx = strstr(line, varname)) == line && strchr("= ", line[strlen(varname)])) {
+        
+        //Searches for the variable in the list of variables
+        if(!strcmp(varname, variable)) {
+            
+            tokidx = strstr(line, varname);
 
             //The variable is in the string
 
@@ -195,6 +207,8 @@ void parseLine(FILE* execfile, char* line) {
             stackPop(execfile, 0x10);
             sprintf(addrBuffer, "st y, r16\n");
             writeAsmBlock(execfile, addrBuffer);
+            
+            free(variable); 
 
             return;
         }
