@@ -3,7 +3,9 @@ CC = gcc
 CFLAGS = -Wall -Werror --pedantic -g -Iinclude/
 
 EXEC = ascript 
-OBJS = src/main.o src/srccompile.o src/list.o src/asmcommands.o src/mathconvert.o src/pemdas.o src/strmanip.o
+
+SRCS = $(wildcard src/*.c)
+OBJS = $(SRCS:.c=.o)
 
 all: $(OBJS)
 	$(CC) -o $(EXEC) $(OBJS) $(CFLAGS)

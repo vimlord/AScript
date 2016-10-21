@@ -41,7 +41,7 @@ void parseSegment(FILE* execfile, char* code);
  */
 void parseLine(FILE* execfile, char* line);
 
-void processToken(FILE* execfile, CMP_TOK tok, char* subline);
+void processToken(FILE* execfile, int tokidx, char* subline);
 
 
 #endif
