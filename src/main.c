@@ -9,7 +9,8 @@
 #include <string.h>
 
 int main(int argc, char* argv[]) {
-    
+
+    int FLAG_OPTIMIZE = 0;
     //If no file is provided, immediately exit w/ an error message.
     
     char* INPUTNAME = NULL;
@@ -26,6 +27,8 @@ int main(int argc, char* argv[]) {
                 return EINVAL;
             } else
                 OUTPUTNAME = argv[i];
+        } else if(strcmp(argv[i], "-O") == 0) {
+            FLAG_OPTIMIZE = 1;
         } else
             //The value must be an output
             INPUTNAME = argv[i];
@@ -108,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
-    FILE* execdata = fopen(".asm.dta", "w");
+    FILE* execdata = fopen(FLAG_OPTIMIZE ? ".asm.dta" : OUTPUTNAME, "w");
     
     //Default execution data
     writeComment(execdata, "Sets initial system values");
@@ -137,12 +140,14 @@ int main(int argc, char* argv[]) {
     fclose(swapFile0);
     fclose(execdata);
     
-    FILE* prepped = fopen(".asm.dta", "r");
-    FILE* result = fopen(OUTPUTNAME, "w");
+    if(FLAG_OPTIMIZE) {
+        FILE* prepped = fopen(".asm.dta", "r");
+        FILE* result = fopen(OUTPUTNAME, "w");
     
-    performOptimizations(prepped, result);
+        performOptimizations(prepped, result);
     
-    fclose(result);
+        fclose(result);
+    }
     //remove(".asm.dta");
 
 }
