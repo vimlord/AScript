@@ -187,7 +187,7 @@ void parseLine(FILE* execfile, char* line) {
                 printf("Error during compilation: A variable was not found.\n");
                 exit(EINVAL);
             }
-            sprintf(addrBuffer, "ldi r16, $%x\nsub yl, r16\n", stkIdx % 256);
+            sprintf(addrBuffer, "ldi r16, %i\nsub yl, r16\n", stkIdx % 256);
             writeAsmBlock(execfile, addrBuffer);
             
             if(arrIdxStr) {

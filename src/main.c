@@ -141,6 +141,9 @@ int main(int argc, char* argv[]) {
     FILE* result = fopen(OUTPUTNAME, "w");
     
     performOptimizations(prepped, result);
+    
+    fclose(result);
+    //remove(".asm.dta");
 
 }
 

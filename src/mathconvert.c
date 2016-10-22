@@ -12,7 +12,7 @@ void pemdas(FILE* execfile, char* calc) {
 
     if(!(*calc)) {
         //Fills the address with 0 if the string is empty.
-        loadReg(execfile, 16, "$0");
+        loadReg(execfile, 16, "0");
         stackPush(execfile, 16);
         return;
         
@@ -135,7 +135,7 @@ void pemdas(FILE* execfile, char* calc) {
         char addrBuffer[64];
 
         //Gets index on stack
-        sprintf(addrBuffer, "ldi r16, $%x\nsub xl, r16\n", i % 256);
+        sprintf(addrBuffer, "ldi r16, %i\nsub xl, r16\n", i % 256);
         writeAsmBlock(execfile, addrBuffer);
 
         if(arrIdxStr) {
@@ -190,7 +190,7 @@ void jumpIfFalse(FILE* execfile, char* cond, char* label) {
     writeComment(execfile, "Get values");
     //Copies the value into registers
     stackPop(execfile, 16);
-    loadReg(execfile, 17, "$0");
+    loadReg(execfile, 17, "0");
 
     writeComment(execfile, "Branch if zero");
     //Branches if equal to zero (0 is false)

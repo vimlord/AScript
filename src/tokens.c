@@ -65,7 +65,7 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
         stackPop(execfile, 16);
 
     } else
-       loadReg(execfile, 16, "$0");
+       loadReg(execfile, 16, "0");
     
     //This ensures that if there is more than one item, they will all have the same value
     i = 0;

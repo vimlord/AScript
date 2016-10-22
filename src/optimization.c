@@ -11,7 +11,7 @@ int optimizeAsm(FILE* src, FILE* dst) {
     
     char buffer[256];
 
-    int i;
+    int i, j;
     int changes = 0;
     
     /* Performs optimization by removing redundant lines one at a time */
@@ -29,7 +29,7 @@ int optimizeAsm(FILE* src, FILE* dst) {
             if (strstr(prevLine, "push ") == prevLine &&
                 strstr(currLine, "pop ") == currLine) {
                 /*
-                Push-Pop Redundancy
+                Push-Pop Redundancy (push x; pop x)
                 Saves 3 clock cycles per change
                 3+3 before, 1 after
                 */
@@ -44,6 +44,37 @@ int optimizeAsm(FILE* src, FILE* dst) {
                 //printf("'%s'\n", prevLine);
 
                 //Makes the line unreadable
+                free(currLine);
+                continue;
+            } else if(strstr(currLine, "mov ") == currLine) {
+                //Opportunity for redundant assignments exists
+
+                //Gets the index of the char after the comma
+                i = 4;
+                while(currLine[i++] != ',');
+                j = 4;
+                while(currLine[i] && currLine[j++] == currLine[i++]);
+
+                if(!currLine[i]) {
+                    /*
+                    MOV Redundancy (mov x, x)
+                    Saves 1 clock cycle per change
+                    1 before, 0 after
+                    */
+                    changes++;
+                    free(currLine);
+                    continue;
+                }
+
+            } else if (!strcmp(prevLine, currLine) && 
+                        (strstr(currLine, "ldi ") == currLine ||
+                         strstr(currLine, "mov ") == currLine)) {
+                /*
+                Extra Action (ldi x, y; ldi x, y) or (mov x, y; mov x, y)
+                Saves 1 clock cycle per change
+                1 before, 0 after
+                */
+                changes++;
                 free(currLine);
                 continue;
             }
