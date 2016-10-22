@@ -1,7 +1,9 @@
 #include "main.h"
+
+#include "asmcommands.h"
 #include "srccompile.h"
 #include "strmanip.h"
-#include "asmcommands.h"
+#include "optimization.h"
 
 #include <errno.h>
 #include <string.h>
@@ -106,7 +108,7 @@ int main(int argc, char* argv[]) {
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
-    FILE* execdata = fopen(OUTPUTNAME, "w");
+    FILE* execdata = fopen(".asm.dta", "w");
     
     //Default execution data
     writeComment(execdata, "Sets initial system values");
@@ -131,12 +133,14 @@ int main(int argc, char* argv[]) {
         nextLine = getNextLine(swapFile0);
     }
 
+    //Closes the two swap files
     fclose(swapFile0);
-
-    //Final cleanup
-    remove(".swapspace0.dta");
-
     fclose(execdata);
+    
+    FILE* prepped = fopen(".asm.dta", "r");
+    FILE* result = fopen(OUTPUTNAME, "w");
+    
+    performOptimizations(prepped, result);
 
 }
 
