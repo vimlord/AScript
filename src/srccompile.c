@@ -21,12 +21,18 @@ TokenProcess TOKFUNCS[] = {
 List VARIABLES = NULL;
 List ADDRESSES = NULL;
 
+int LOOP_DEPTH = 0;
+
 List getVars() {
     return VARIABLES ? VARIABLES : (VARIABLES = makeList());
 }
 
 List getStkAddrs() {
     return ADDRESSES ? ADDRESSES : (ADDRESSES = makeList());
+}
+
+int getLoopDepth() {
+    return LOOP_DEPTH;
 }
 
 /**
@@ -80,9 +86,7 @@ void parseSegment(FILE* execfile, char* code) {
     char* front = code;
     
     //Stores the layer depth of the program.
-    static int depth = 0;
-    
-    depth++;
+    LOOP_DEPTH++;
 
     while(*front) {
         
@@ -101,7 +105,7 @@ void parseSegment(FILE* execfile, char* code) {
 
     }
 
-    depth--;
+    LOOP_DEPTH--;
 
 }
 

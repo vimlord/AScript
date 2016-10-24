@@ -13,6 +13,8 @@ char* TOKENS[4];
 List getVars();
 List getStkAddrs();
 
+int getLoopDepth();
+
 int stackAddressOfVar(char* var);
 
 int compTok(CMP_TOK a, CMP_TOK b);

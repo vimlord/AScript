@@ -132,7 +132,6 @@ void performOptimizations(FILE* src, FILE* dst) {
         totalChanges += (count = optimizeAsm(input, output));
         
         fclose(input);
-        printf("removing %s\n", filename);
         remove(filename);
         fclose(output);
     }
@@ -146,7 +145,7 @@ void performOptimizations(FILE* src, FILE* dst) {
     fclose(input);
     remove(filename);
 
-    printf("Made %i optimizations in %i passes.\n", totalChanges, i+1);
-
+    printf("\033[1m\033[34m" "Made %i optimizations in %i passes." "\x1B[0m", totalChanges, i+1);
+    printf("\n\n");
 }
 

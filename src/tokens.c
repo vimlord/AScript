@@ -1,6 +1,7 @@
 #include "tokens.h"
 
 #include "asmcommands.h"
+#include "error.h"
 #include "mathconvert.h"
 #include "srccompile.h"
 #include "strmanip.h"
@@ -12,6 +13,13 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
 
     int nbytes = 1; //The size of the list, in bytes (1 * size)
     int i = 0; //The index of the variable name's first char
+    
+    //Creating variables in a loop might not be appreciated
+    if(getLoopDepth() > 1) {
+        char buffer[50 + strlen(subline)];
+        sprintf(buffer, "Creating byte inside loop:\n%s\n", subline);
+        throwWarning(buffer);
+    }
 
     if(*subline == '[') {
         //Get the variable size from the string

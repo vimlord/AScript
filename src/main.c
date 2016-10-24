@@ -146,6 +146,9 @@ int main(int argc, char* argv[]) {
         remove(".swapspace0.dta");
 
     remove(".asm.dta");
+    
+    printf("%sCompilation successful.%s\n", "\033[1m\033[32m", "\x1B[0m");
+    printf("%sFile created at %s\n\n", "\x1b[0m", OUTPUTNAME);
 
 }
 
