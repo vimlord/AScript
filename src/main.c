@@ -4,6 +4,7 @@
 #include "srccompile.h"
 #include "strmanip.h"
 #include "optimization.h"
+#include "error.h"
 
 #include <errno.h>
 #include <string.h>
@@ -23,7 +24,7 @@ int main(int argc, char* argv[]) {
         if(strcmp(argv[i], "-o") == 0) {
             //The user wishes to specify an output
             if(!argv[++i]) {
-                printf("Error during compilation: No output file provided.\n");
+                throwError("No output file specified.");
                 return EINVAL;
             } else
                 OUTPUTNAME = argv[i];
@@ -39,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     if(!INPUTNAME) {
         //No input file.
-        printf("Error during compilation: No input file specified.\n");
+        throwError("No input file specified.");
         return EINVAL;
     } else if(!OUTPUTNAME) {
         //Gets the name of the output file, since none is specified.
@@ -63,25 +64,19 @@ int main(int argc, char* argv[]) {
     while(*outputext && *outputext != '.')
         outputext = &outputext[1];
     
-    if(strcmp(inputext, ".scr")) {
-        printf("Error during compilation: Input file extension must be .scr\n");
-        return EINVAL;
-    } else if(strcmp(outputext, ".asm")) {
-        printf("Error during compilation: Output file extension must be .asm\n");
-        return EINVAL;
-    }
-
-
+    if(strcmp(inputext, ".scr"))
+        throwError("Input file extension must be .scr");
+    else if(strcmp(outputext, ".asm"))
+        throwError("Output file extension must be .asm");
+    
 
     //The source file
     FILE* sourceFile = fopen(INPUTNAME, "r");
     
     //Checks to see if the file exists, and returns an error
     //if the file does not exist.
-    if(!sourceFile) {
-        printf("Error during compilation: Input file not found.\n");
-        return ENOENT;
-    }
+    if(!sourceFile)
+        throwError("Input file not found.");
 
     //Create a swap file for writing
     FILE* swapFile0 = fopen(".swapspace0.dta", "w+");

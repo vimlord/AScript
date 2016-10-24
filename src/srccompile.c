@@ -1,6 +1,7 @@
 #include "srccompile.h"
 
 #include "asmcommands.h"
+#include "error.h"
 #include "mathconvert.h"
 #include "strmanip.h"
 #include "tokens.h"
@@ -217,8 +218,7 @@ void parseLine(FILE* execfile, char* line) {
     }
 
     //If nothing has been chosen at this point, there's a syntax error.
-    printf("Error during compilation: Unable to find token or variable.\n");
-    exit(EINVAL);
+    throwError("Unable to find token or variable.");
 
 }
 
