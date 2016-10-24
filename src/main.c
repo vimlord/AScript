@@ -142,8 +142,10 @@ int main(int argc, char* argv[]) {
         performOptimizations(prepped, result);
     
         fclose(result);
-    }
-    //remove(".asm.dta");
+    } else
+        remove(".swapspace0.dta");
+
+    remove(".asm.dta");
 
 }
 
