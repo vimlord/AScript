@@ -6,6 +6,7 @@
  * data field, the following bits are assigned to the given checks:
  *
  * 0 - Exit on warning
+ * 1 - Optimization flag
  */
 
 /**

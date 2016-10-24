@@ -11,7 +11,6 @@
 
 int main(int argc, char* argv[]) {
 
-    int FLAG_OPTIMIZE = 0;
     //If no file is provided, immediately exit w/ an error message.
     
     char* INPUTNAME = NULL;
@@ -28,8 +27,14 @@ int main(int argc, char* argv[]) {
                 return EINVAL;
             } else
                 OUTPUTNAME = argv[i];
-        } else if(strcmp(argv[i], "-O") == 0) {
-            FLAG_OPTIMIZE = 1;
+        } else if(*(argv[i]) == '-') {
+            int j = 0;
+            while(argv[i][j++]) {
+                if(argv[i][j] == 'O')
+                    addErrorFlags(2);
+                else if(argv[i][j] == 'w')
+                    addErrorFlags(1);
+            }
         } else
             //The value must be an output
             INPUTNAME = argv[i];
@@ -106,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
-    FILE* execdata = fopen(FLAG_OPTIMIZE ? ".asm.dta" : OUTPUTNAME, "w");
+    FILE* execdata = fopen(getErrorFlag(2) ? ".asm.dta" : OUTPUTNAME, "w");
     
     //Default execution data
     writeComment(execdata, "Sets initial system values");
@@ -135,7 +140,7 @@ int main(int argc, char* argv[]) {
     fclose(swapFile0);
     fclose(execdata);
     
-    if(FLAG_OPTIMIZE) {
+    if(getErrorFlag(1)) {
         FILE* prepped = fopen(".asm.dta", "r");
         FILE* result = fopen(OUTPUTNAME, "w");
     
