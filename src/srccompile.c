@@ -223,7 +223,10 @@ void parseLine(FILE* execfile, char* line) {
     }
 
     //If nothing has been chosen at this point, there's a syntax error.
-    throwError("Unable to find token or variable.");
+    char* helpMssg = contentToOperator(line, '{', '\0', '\0');
+    char buffer[36 + strlen(helpMssg)];
+    sprintf(buffer, "Unable to find token or variable:\n%s\n", helpMssg);
+    throwError(buffer);
 
 }
 
