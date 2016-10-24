@@ -1,6 +1,7 @@
 #include "optimization.h"
 
 #include "asmcommands.h"
+#include "error.h"
 #include "strmanip.h"
 
 #include <string.h>
@@ -16,7 +17,7 @@ int optimizeAsm(FILE* src, FILE* dst) {
     
     /* Performs optimization by removing redundant lines one at a time */
     while(*(currLine = stringUpTo(src, '\n', '\0', '\0')) != EOF) {
-
+        
         if(*currLine == ';' || *currLine == '\0') {
             //Comment and blank lines will be ignored
             free(currLine);
@@ -112,7 +113,7 @@ int optimizeAsm(FILE* src, FILE* dst) {
 void performOptimizations(FILE* src, FILE* dst) {
     FILE* input = NULL;
     FILE* output = fopen(".swapspace0.dta", "w");
-
+    
     int i = 0;
     int count = optimizeAsm(src, output);
     char filename[16];
@@ -120,9 +121,8 @@ void performOptimizations(FILE* src, FILE* dst) {
     int totalChanges = count;
 
     fclose(output);
-    
-    while(count) {
 
+    while(count) {
         sprintf(filename, ".swapspace%i.dta", i+1);
         output = fopen(filename, "w");
 
@@ -135,7 +135,7 @@ void performOptimizations(FILE* src, FILE* dst) {
         remove(filename);
         fclose(output);
     }
-    
+
     sprintf(filename, ".swapspace%i.dta", i);
     input = fopen(filename, "r");
     char c;

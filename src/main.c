@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     //Create new stack frame file and execution file.
     //Hold stack frame data and execution instructions.
-    FILE* execdata = fopen(getErrorFlag(2) ? ".asm.dta" : OUTPUTNAME, "w");
+    FILE* execdata = fopen(getErrorFlag(1) ? ".asm.dta" : OUTPUTNAME, "w");
     
     //Default execution data
     writeComment(execdata, "Sets initial system values");
@@ -141,6 +141,7 @@ int main(int argc, char* argv[]) {
     fclose(execdata);
     
     if(getErrorFlag(1)) {
+
         FILE* prepped = fopen(".asm.dta", "r");
         FILE* result = fopen(OUTPUTNAME, "w");
     
