@@ -74,6 +74,7 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     return *ptr; 
 
 }
+
 void parseSegment(FILE* execfile, char* code) {
     char* nextLine = NULL;
     char* front = code;
