@@ -76,6 +76,22 @@ This will compile the source into an executable. Then, run the executable with y
 
 Note that the source file must be a .scr file. The program will output the result into a .asm file in the current directory as long as it compiled correctly. The asm file can then be used in your IDE of choice. Compilation can go wrong in several instances. For example, if one does not provide a valid input file, the program will indicate this and immediately terminate.
 
+The executable also provides several flags that can be enabled to customize compilation. They are as follows:
+
+| Flag | Name | Description |
+| ---- | ---- | ----------- |
+| o | Output Selector |Sets the output file to compile to (must be an asm file). |
+| O | Optimization Flag | Enables optimization. The compiler will give extra output to indicate the number of changes. |
+| w | Warning Error Flag | Interprets all warnings as errors. |
+
+For example, if I wanted to compile the sorting demo (examples/sorting.scr) to test.asm, using the O and w flags, I would run:
+
+```
+./ascript -o test.asm examples/sorting.asm -Ow
+```
+
+Note that the -o flag is separate from the other flags, and that test.asm immediately succeeds it. This rule must be followed when using the output flag, although -o does not have to be immediately after the program name.
+
 ##Future
 
 In the future, I hope to add more functionality to the language. At this point, the language still needs to undergo a lot of testing and improvement. Future changes will hopefully include optimization and I/O through the Arduino's I/O ports.
