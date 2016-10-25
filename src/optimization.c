@@ -145,7 +145,7 @@ void performOptimizations(FILE* src, FILE* dst) {
     fclose(input);
     remove(filename);
 
-    printf("\033[1m\033[34m" "Made %i optimizations in %i passes." "\x1B[0m", totalChanges, i+1);
-    printf("\n\n");
+    printf("\033[1m\033[33m" "Made %i optimizations in %i passes." "\x1B[0m", totalChanges, i+1);
+    printf("\n");
 }
 
