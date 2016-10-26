@@ -115,10 +115,10 @@ int main(int argc, char* argv[]) {
     
     //Default execution data
     writeComment(execdata, "Sets initial system values");
-    writeAsmBlock(execdata, "ldi sph, high(RAMEND)\n");
-    writeAsmBlock(execdata, "ldi spl, low(RAMEND)\n");
-    writeAsmBlock(execdata, "mov xh, sph\n");
-    writeAsmBlock(execdata, "mov xl, spl\n");
+    writeAsmBlock(execdata, "ldi xh, high(RAMEND)\n");
+    writeAsmBlock(execdata, "out sph, xh\n");
+    writeAsmBlock(execdata, "ldi xl, low(RAMEND)\n");
+    writeAsmBlock(execdata, "out spl, xl\n");
 
     writeAsmBlock(execdata, "\n");
 
