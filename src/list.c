@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 struct node;
 typedef struct node* Node;
@@ -47,6 +48,35 @@ void* getFromList(List lst, int idx) {
     return n->val;
 }
 
+void* remFromList(List lst, int idx) {
+    int i = 0;
+    Node n = lst->front;
+    void* res;
+
+    if(!idx) {
+        //Front of list
+        lst->front = n->next;
+    } else {
+        Node prev;
+        while(i++ < idx) {
+            prev = n;
+            n = n->next;
+        }
+        
+        //Relink
+        prev->next = n->next;
+        
+    }
+    
+    res = n->val;
+
+    n->next = NULL;
+    n->val = NULL;
+
+    free(n);
+    return res;
+}
+
 int listIndexOfStr(List lst, char* str) {
     int idx = 0;
     Node curr = lst->front;
@@ -73,7 +103,15 @@ int listSize(List lst) {
     return len;
 }
 
+void printListStr(List lst) {
+    
+    Node curr = lst->front;
+    while(curr) {
+        printf("%s\n", (char*) curr->val);
+        curr = curr->next;
+    }
 
+}
 
 
 

@@ -10,6 +10,8 @@
 #include <stdlib.h>
 
 void processByte(FILE* execfile, char* subline, int tokenid) {
+    
+    printf("byte %s\n", subline);
 
     int nbytes = 1; //The size of the list, in bytes (1 * size)
     int i = 0; //The index of the variable name's first char

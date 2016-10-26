@@ -21,7 +21,7 @@ TokenProcess TOKFUNCS[] = {
 List VARIABLES = NULL;
 List ADDRESSES = NULL;
 
-int LOOP_DEPTH = 0;
+int LOOP_DEPTH = -1;
 
 List getVars() {
     return VARIABLES ? VARIABLES : (VARIABLES = makeList());
@@ -65,6 +65,8 @@ int compTok(CMP_TOK a, CMP_TOK b) {
  * Returns the address of the variable in memory.
  */
 int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
+    
+    printf("Adding variable %s\n", varname);
 
     static int vars = 0;
     
@@ -76,6 +78,9 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
 
     addToList(getVars(), varname);
     addToList(getStkAddrs(), ptr);
+    
+    printf("Variable list:\n");
+    printListStr(getVars());
 
     return *ptr; 
 
@@ -87,6 +92,11 @@ void parseSegment(FILE* execfile, char* code) {
     
     //Stores the layer depth of the program.
     LOOP_DEPTH++;
+    
+    //Holds the old size of the list
+    int numvars = listSize(getVars());
+    
+    printf("There are initially %i vars\n", numvars);
 
     while(*front) {
         
@@ -105,6 +115,29 @@ void parseSegment(FILE* execfile, char* code) {
 
     }
 
+    int endvars = listSize(getVars());
+    
+    if(LOOP_DEPTH && endvars > numvars) {
+
+        printf("Must free %i variables\n", endvars - numvars);
+
+        while(endvars > numvars) {
+            free(remFromList(getVars(), endvars-1));
+            free(remFromList(getStkAddrs(), endvars-1));
+            endvars--;
+        }
+
+        writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
+        
+        //Get the stack pointer before the segment
+        int stkaddrs = numvars ? (*((int*) getFromList(getStkAddrs(), numvars-1)) + 1) : 0;
+        char buffer[128];
+        sprintf(buffer, "ldi r16, %i\nsub yl, r16\n", stkaddrs);
+        writeAsmBlock(execfile, buffer);
+
+        //Reset the stack pointer
+        writeAsmBlock(execfile, "out sph, yh\nout spl, yl\n");
+    }
     LOOP_DEPTH--;
 
 }
