@@ -17,7 +17,7 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
     //Creating variables in a loop might not be appreciated
     if(getLoopDepth() > 1) {
         char buffer[50 + strlen(subline)];
-        sprintf(buffer, "Creating byte inside loop:\n%s\n", subline);
+        sprintf(buffer, "Attempting to create byte inside loop:\n%s\n", subline);
         throwWarning(buffer);
     }
 
@@ -42,9 +42,14 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
         nbytes = 1;
     }
     
+    //There should be a variable name
+    if(!subline[i] || subline[i] == '=') {
+        throwError("Attempting to create byte without name.\n");
+    }
+
     int len = 0;
-    while(subline[len + i] != ' ' && subline[len + i]) len++;
-       
+    while(subline[len + i] != ' ' && subline[len + i] && subline[len + i] != '=') len++;
+     
     //Allocates space for the variable name
     char* varname = (char*) malloc((len+1) * sizeof(char));
     
@@ -56,7 +61,7 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
         j++;
     }
     i += len; 
-
+    
     //Adds the variable.
     /*int valIdx = */addVariable(execfile, "byte", varname, nbytes);
 
