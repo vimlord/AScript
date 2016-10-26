@@ -135,7 +135,7 @@ void pemdas(FILE* execfile, char* calc) {
         char addrBuffer[64];
 
         //Gets index on stack
-        sprintf(addrBuffer, "ldi r16, %i\nsub xl, r16\n", i % 256);
+        sprintf(addrBuffer, "ldi r16, %i\nsub yl, r16\n", i % 256);
         writeAsmBlock(execfile, addrBuffer);
 
         if(arrIdxStr) {
