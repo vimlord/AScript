@@ -177,15 +177,19 @@ void parseLine(FILE* execfile, char* line) {
             //By default, no equals sign means that the value will be set to 0.
             while(tokidx[idx] && tokidx[idx] != '=') idx++;
             writeComment(execfile, "Computing value"); 
-            pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0");
+            pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0"); //Compute the value
             writeComment(execfile, "Determining pointer address");
             
             //The access is done as an array
             //First, calculate the address
             char addrBuffer[64];
-            //We will need the zero index of the stack
-            //(x always holds index 0 of the stack)
-            writeAsmBlock(execfile, "ld yh, xh\nld yl, xl\n");
+
+            /*
+             * We will need the zero index of the stack
+             * (x always holds index 0 of the stack)
+             * It will be copied to y
+             */
+            writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
             //Gets index on stack
             int stkIdx = stackAddressOfVar(varname);
             if(stkIdx < 0) {
@@ -193,9 +197,15 @@ void parseLine(FILE* execfile, char* line) {
                 printf("Error during compilation: A variable was not found.\n");
                 exit(EINVAL);
             }
+
+            /**
+             * The index of the variable on the stack is then subtracted
+             * from the pointer to the bottom of the stack.
+             */
             sprintf(addrBuffer, "ldi r16, %i\nsub yl, r16\n", stkIdx % 256);
             writeAsmBlock(execfile, addrBuffer);
             
+            //Increments y by the array address.
             if(arrIdxStr) {
                 writeComment(execfile, "Computing array index");
                 //Then, we calculate the index
@@ -204,7 +214,7 @@ void parseLine(FILE* execfile, char* line) {
                 stackPop(execfile, 16);
 
                 //Then, we need to add it to the zero memory address
-                addReg(execfile, 0x1d, 0x10);
+                writeAsmBlock(execfile, "add yl, r16\n");
             } 
             
             writeComment(execfile, "Storing end result");
