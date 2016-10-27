@@ -8,10 +8,17 @@
 //Tokens
 typedef char* CMP_TOK;
 
+struct var_frame {
+    char* name;
+    char* type;
+    int addr;
+};
+
+typedef struct var_frame* VarFrame;
+
 char* TOKENS[4]; 
 
 List getVars();
-List getStkAddrs();
 
 int getLoopDepth();
 

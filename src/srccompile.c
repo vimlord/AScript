@@ -27,10 +27,6 @@ List getVars() {
     return VARIABLES ? VARIABLES : (VARIABLES = makeList());
 }
 
-List getStkAddrs() {
-    return ADDRESSES ? ADDRESSES : (ADDRESSES = makeList());
-}
-
 int getLoopDepth() {
     return LOOP_DEPTH;
 }
@@ -40,13 +36,19 @@ int getLoopDepth() {
  */
 int stackAddressOfVar(char* var) {
     List list = getVars();
-    int idx = listIndexOfStr(list, var);
-    if(idx < 0)
-        return -1;
-    else {
-        int* ptr = (int*) getFromList(getStkAddrs(), idx);
-        return *ptr;
+    int i = 0, len = listSize(list);
+
+    while(i < len) {
+        VarFrame frame = (VarFrame) getFromList(list, i);
+
+        if(!strcmp(var, frame->name))
+            return frame->addr;
+        
+        i++;
     }
+
+    return -1;
+
 }
 
 int compTok(CMP_TOK a, CMP_TOK b) {
@@ -73,16 +75,21 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     loadReg(execfile, 16, "0");
 
     //The address of the new memory
-    int* ptr = (int*) malloc(sizeof(int));
-    *ptr = (vars += nbytes) - 1;
+    int ptr = (vars += nbytes) - 1;
+    
+    VarFrame frame = (VarFrame) malloc(sizeof(struct var_frame));
+    frame->name = varname;
+    frame->type = type;
+    frame->addr = ptr;
 
-    addToList(getVars(), varname);
-    addToList(getStkAddrs(), ptr);
+    addToList(getVars(), frame);
     
     printf("Variable list:\n");
-    printListStr(getVars());
+    int i = 0;
+    while(i < listSize(getVars()))
+        printf("%s\n", ((VarFrame) getFromList(getVars(), i++))->name);
 
-    return *ptr; 
+    return ptr; 
 
 }
 
@@ -122,15 +129,16 @@ void parseSegment(FILE* execfile, char* code) {
         printf("Must free %i variables\n", endvars - numvars);
 
         while(endvars > numvars) {
-            free(remFromList(getVars(), endvars-1));
-            free(remFromList(getStkAddrs(), endvars-1));
+            VarFrame v = remFromList(getVars(), endvars-1);
+            free(v->name);
+            free(v);
             endvars--;
         }
 
         writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
         
         //Get the stack pointer before the segment
-        int stkaddrs = numvars ? (*((int*) getFromList(getStkAddrs(), numvars-1)) + 1) : 0;
+        int stkaddrs = numvars ? ((VarFrame) getFromList(getVars(), numvars-1))->addr : 0;
         char buffer[128];
         sprintf(buffer, "ldi r16, %i\nsub yl, r16\n", stkaddrs);
         writeAsmBlock(execfile, buffer);
@@ -194,9 +202,9 @@ void parseLine(FILE* execfile, char* line) {
         arrIdxStr = closureContent(&line[i+1], '[', ']');
     
     i = 0;
-    int len = listSize(VARIABLES);
+    int len = listSize(getVars());
     while(i < len) {
-        char* varname = getFromList(VARIABLES, i);
+        char* varname = ((VarFrame)getFromList(getVars(), i))->name;
         
         //Searches for the variable in the list of variables
         if(!strcmp(varname, variable)) {

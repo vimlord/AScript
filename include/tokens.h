@@ -11,6 +11,11 @@ typedef void (*TokenProcess)(FILE*, char*, int);
 void processByte(FILE* execfile, char* subline, int tokenid);
 
 /**
+ * Handles the 'ptr' keyword. This is used to instantiate a pointer.
+ */
+void processPtr(FILE* execfile, char* subline, int tokenid);
+
+/**
  * Handles the 'if' and 'else' keywords. Used for if-else.
  */
 void processIfElse(FILE* execfile, char* subline, int tokenid);
