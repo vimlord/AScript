@@ -51,7 +51,14 @@ int stackAddressOfVar(char* var) {
 }
 
 void loadStackAddressOf(FILE* execfile, char* var) {
-    int stkptr = stackAddressOfVar(var);
+    char* name = contentToOperator(var, '[', '\0', '\0');
+    char* tmp = &var[strlen(name)];
+    while(*tmp == ' ') tmp = &tmp[1];
+    char* arrIndex = NULL;
+    if(*tmp == '[')
+        arrIndex = closureContent(&tmp[1], '[', ']');
+
+    int stkptr = stackAddressOfVar(name);
     writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
 
     char buffer[64];
@@ -60,6 +67,19 @@ void loadStackAddressOf(FILE* execfile, char* var) {
 
     sprintf(buffer, "ldi r16, %i\nsbc yl, r16", stkptr / 256);
     writeAsmBlock(execfile, buffer);
+    
+    if(arrIndex) {
+        //Compute the array index and store it in r16
+        pemdas(execfile, arrIndex);
+        stackPop(execfile, 16);
+        
+        //Goes to the address
+        writeAsmBlock(execfile, "add yl, r16\nldi r16, 0\nadc yh, r16\n");
+
+        free(arrIndex);
+    }
+
+    free(name);
 }
 
 int compTok(CMP_TOK a, CMP_TOK b) {
