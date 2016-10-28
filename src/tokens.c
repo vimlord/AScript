@@ -11,8 +11,6 @@
 
 void processByte(FILE* execfile, char* subline, int tokenid) {
     
-    printf("byte %s\n", subline);
-
     int nbytes = 1; //The size of the list, in bytes (1 * size)
     int i = 0; //The index of the variable name's first char
     
@@ -200,5 +198,61 @@ void processWhileLoop(FILE* execfile, char* subline, int tokenid) {
 
 }
 
+void processPtr(FILE* execfile, char* subline, int tokenid) {
+    
+    //Creating variables in a loop might not be appreciated
+    if(getLoopDepth() > 1) {
+        char buffer[50 + strlen(subline)];
+        sprintf(buffer, "Attempting to create ptr inside loop:\n%s\n", subline);
+        throwWarning(buffer);
+    }
+    
+    //Get the length of the string
+    int len = 0;
+    while(subline[len] && subline[len] != ' ' && subline[len] != '=') len++;
 
+    char* varname = (char*) malloc((len+1) * sizeof(char));
+    int j = -1;
+    while(++j < len)
+        varname[j] = subline[j];
+    varname[len] = '\0';
+
+    /* Adds the variable. A pointer is two bytes due to 16-bit architecture */
+    addVariable(execfile, "ptr", varname, 2);
+
+    int i = len;
+    while(subline[i] == ' '); i++;
+
+    if(subline[i] == '=') {
+        while(subline[++i] == ' ');
+
+        //There should be something here. If not, throw an error.
+        if(!subline[i]) {
+            char buffer[64 + strlen(subline)];
+            sprintf(buffer, "Attempting to assign value to new ptr without providing value.\n%s\n", subline);
+            throwError(buffer);
+        } else if(subline[i] == '#') {
+            char* tmp = contentToOperator(&subline[i+1], ' ', '[', ']');
+            loadStackAddressOf(execfile, tmp); 
+            free(tmp);
+
+        } else {
+            /* The value is a number */
+            int addrs = atoi(&subline[i+1]);
+            char buffer[32];
+            sprintf(buffer, "ldi yh, %i\nldi yl, %i\n", addrs/256, addrs%256);
+            writeAsmBlock(execfile, buffer);
+        }
+
+
+    } else {
+        writeAsmBlock(execfile, "ldi yh, 0\nldi yl, 0\n");
+    }
+
+    //Put the value into the slot piece by piece.
+    //I elected to push high, then low in case of arithmetic
+    //between types of different sizes
+    writeAsmBlock(execfile, "push yh\npush yl\n");
+
+}
 

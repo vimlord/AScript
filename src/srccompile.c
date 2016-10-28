@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 
-char* TOKENS[] = {"if", "while", "byte", ""};
+char* TOKENS[] = {"if", "while", "byte", "ptr", ""};
 TokenProcess TOKFUNCS[] = {
     processIfElse,
     processWhileLoop,
@@ -19,7 +19,6 @@ TokenProcess TOKFUNCS[] = {
 
 //A singleton list that holds the program variables
 List VARIABLES = NULL;
-List ADDRESSES = NULL;
 
 int LOOP_DEPTH = -1;
 
@@ -51,21 +50,23 @@ int stackAddressOfVar(char* var) {
 
 }
 
+void loadStackAddressOf(FILE* execfile, char* var) {
+    int stkptr = stackAddressOfVar(var);
+    writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
+
+    char buffer[64];
+    sprintf(buffer, "ldi r16, %i\nsub yl, r16", stkptr % 256);
+    writeAsmBlock(execfile, buffer);
+
+    sprintf(buffer, "ldi r16, %i\nsbc yl, r16", stkptr / 256);
+    writeAsmBlock(execfile, buffer);
+}
+
 int compTok(CMP_TOK a, CMP_TOK b) {
     return strcmp(a, b);
 }
 
 
-/**
- * Adds a variable to the heap.
- *
- * execfile - The file containing the instructions.
- * type     - The type of variable being added.
- * val      - The initial value.
- * varname  - The name of the variable.
- *
- * Returns the address of the variable in memory.
- */
 int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     
     printf("Adding variable %s\n", varname);

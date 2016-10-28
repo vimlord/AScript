@@ -16,21 +16,26 @@ struct var_frame {
 
 typedef struct var_frame* VarFrame;
 
-char* TOKENS[4]; 
+char* TOKENS[5]; 
 
 List getVars();
 
 int getLoopDepth();
 
 int stackAddressOfVar(char* var);
+void loadStackAddressOf(FILE* execfile, char* var); //Loads the address into y
 
 int compTok(CMP_TOK a, CMP_TOK b);
 
 /**
- * Adds the data to the stack frame file that correlates 
- * with the given value.
+ * Adds a variable to the stack.
  *
- * Returns the variable number.
+ * execfile - The file containing the instructions.
+ * type     - The type of variable being added.
+ * val      - The initial value.
+ * varname  - The name of the variable.
+ *
+ * Returns the address of the variable in the stack frame.
  */
 int addVariable(FILE* stkfile, CMP_TOK type, char* varname, int nbytes);
 
