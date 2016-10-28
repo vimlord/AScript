@@ -199,11 +199,11 @@ void parseLine(FILE* execfile, char* line) {
         
         //Searches for the variable in the list of variables
         if(!strcmp(varname, variable)) {
-            
-            processByteAssign(execfile, line, varname, arrIdxStr);
-
+            if(!strcmp(varframe->type, "byte"))
+                processByteAssign(execfile, line, varname, arrIdxStr);
+            else if(!strcmp(varframe->type, "ptr"))
+                processByteAssign(execfile, line, varname, arrIdxStr);
             free(variable);
-            
             return;
         }
         

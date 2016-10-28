@@ -30,6 +30,12 @@ void processWhileLoop(FILE* execfile, char* subline, int tokenid);
  */
 void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr);
 
+/**
+ * Performs assignment to a byte.
+ */
+void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr);
+
+
 #endif
 
 

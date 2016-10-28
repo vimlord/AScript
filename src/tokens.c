@@ -231,7 +231,7 @@ void processPtr(FILE* execfile, char* subline, int tokenid) {
             char buffer[64 + strlen(subline)];
             sprintf(buffer, "Attempting to assign value to new ptr without providing value.\n%s\n", subline);
             throwError(buffer);
-        } else if(subline[i] == '#') {
+        } else if(subline[i] == '@') {
             char* tmp = contentToOperator(&subline[i+1], ' ', '[', ']');
             loadStackAddressOf(execfile, tmp); 
             free(tmp);
@@ -316,7 +316,54 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
 }
 
 
+void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr) {
+    char* subline = strstr(line, varname);
+    while(*subline && *subline != '=') subline = &subline[1];
+    
+    if(!(*subline)) {
+        char buffer[56 + strlen(line)];
+        sprintf(buffer, "Pointer without assignment.\n%s\n", strstr(line, varname));
+        throwError(buffer);
+    }
 
+    int i = 0;
+    while(subline[++i] == ' ');
+
+    if(subline[i] == '@') {
+        //Get address of variable
+        char* tmp = contentToOperator(&subline[i+1], ' ', '[', ']');
+        loadStackAddressOf(execfile, tmp);
+    } else if(subline[i] == '#') {
+        //Get contents of address
+        int val = atoi(&subline[i+1]);
+        char buffer[64];
+        sprintf(buffer, "ldi zh, %i\nldi zl, %i\n", val/256, val%256);
+        writeAsmBlock(execfile, buffer);
+        //Put them into y
+        writeAsmBlock(execfile, "ld yl, z+\nld yh, z+\n");
+    } else {
+        //Get content of address
+        int val = atoi(&subline[i]);
+        char buffer[64];
+        sprintf(buffer, "ldi yh, %i\nldi yl, %i\n", val/256, val%256);
+        writeAsmBlock(execfile, buffer);
+    }
+    
+    //Get the assignment address
+    int stkptr = stackAddressOfVar(varname);
+    writeAsmBlock(execfile, "mov zh, xh\nmov zl, xl\n");
+
+    char buffer[64];
+    sprintf(buffer, "ldi r16, %i\nsub zl, r16", stkptr % 256);
+    writeAsmBlock(execfile, buffer);
+
+    sprintf(buffer, "ldi r16, %i\nsbc zl, r16", stkptr / 256);
+    writeAsmBlock(execfile, buffer);
+
+    //Perform assignment
+    writeAsmBlock(execfile, "st z+, yl\nst z, yh\n");
+
+}
 
 
 
