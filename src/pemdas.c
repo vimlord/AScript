@@ -65,14 +65,33 @@ void mulOperation(FILE* execfile, char* partA, char* partB, int n) {
     //Compute the two subcomponents
     pemdas(execfile, partA, n);
     pemdas(execfile, partB, n);
-
+    
     //Grab the results
-    stackPop(execfile, 17);
-    stackPop(execfile, 16);
+    int i = 0;
+    while(i < 2*n) stackPop(execfile, 18+i++);
+    
+    writeComment(execfile, "Perform multiplication");
 
-    //Mult, then store.
-    mulRegs(execfile, 16, 17);
-    stackPush(execfile, 0);
+    i = n;
+    while(i) {
+        int j = n-i;
+        while(j < i) {
+            //Multiply index j of first w/ n-j of second
+            mulRegs(execfile, 18+j, 18+2*n-j-1);
+            
+            writeAsmBlock(execfile, "add r16, r0\nadc r17, r1\n");
+
+            j++;
+        }
+
+        if(i < n)
+            stackPush(execfile, 17);
+        copyReg(execfile, 17, 16); 
+
+        i--;
+    }
+    
+    stackPush(execfile, 17);
 }
 
 void bitAndOperation(FILE* execfile, char* partA, char* partB, int n) {
