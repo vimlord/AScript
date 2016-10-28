@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-void pemdas(FILE* execfile, char* calc) {
+void pemdas(FILE* execfile, char* calc, int nbytes) {
 
     if(!(*calc)) {
         //Fills the address with 0 if the string is empty.
@@ -21,7 +21,7 @@ void pemdas(FILE* execfile, char* calc) {
         int i = 1;
         while(calc[i] == ' ') i++;
 
-        pemdas(execfile, &calc[i]);
+        pemdas(execfile, &calc[i], nbytes);
         
         return;
     }
@@ -45,7 +45,7 @@ void pemdas(FILE* execfile, char* calc) {
         }
         newCalc[j] = '\0';
         
-        pemdas(execfile, newCalc);
+        pemdas(execfile, newCalc, nbytes);
 
         return;
 
@@ -78,7 +78,7 @@ void pemdas(FILE* execfile, char* calc) {
             
             MathOperation mathOp = operations[i];
 
-            mathOp(execfile, partA, partB);
+            mathOp(execfile, partA, partB, nbytes);
 
             int j = 0;
             while(partA[j]) partA[j++] = '\0';
@@ -97,7 +97,7 @@ void pemdas(FILE* execfile, char* calc) {
     //Drops parentheses if the entire statement is a parenthetical.
     if(*calc == '(') {
         char* parcont = parenthesesContent(&calc[1]);
-        pemdas(execfile, parcont);
+        pemdas(execfile, parcont, nbytes);
 
         i = 0;
         while(parcont[i]) parcont[i++] = '\0';
@@ -143,7 +143,7 @@ void pemdas(FILE* execfile, char* calc) {
             //The access is done as an array
             
             //First, we need the index
-            pemdas(execfile, arrIdxStr);
+            pemdas(execfile, arrIdxStr, nbytes);
             //Next, we pop the value off of the stack
             stackPop(execfile, 16);
 
@@ -165,10 +165,10 @@ void pemdas(FILE* execfile, char* calc) {
     stackPush(execfile, 16);
 }
 
-void jumpIfTrue(FILE* execfile, char* cond, char* label) {
+void jumpIfTrue(FILE* execfile, char* cond, char* label, int nbytes) {
      
     writeComment(execfile, "Compute conditional");
-    pemdas(execfile, cond);
+    pemdas(execfile, cond, nbytes);
     
     writeComment(execfile, "Get values");
     //Copies the value into registers
@@ -182,10 +182,10 @@ void jumpIfTrue(FILE* execfile, char* cond, char* label) {
 
 }
 
-void jumpIfFalse(FILE* execfile, char* cond, char* label) {
+void jumpIfFalse(FILE* execfile, char* cond, char* label, int nbytes) {
     
     writeComment(execfile, "Compute conditional");
-    pemdas(execfile, cond);
+    pemdas(execfile, cond, nbytes);
     
     writeComment(execfile, "Get values");
     //Copies the value into registers

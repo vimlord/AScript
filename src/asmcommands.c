@@ -173,11 +173,11 @@ void eqBool(FILE* execfile, int a, int b, int dst) {
     sprintf(label, "comp%i", comparisons++);
 
     //Sets the initial value for if false, then compares
-    loadReg(execfile, dst, "$1"); 
+    loadReg(execfile, dst, "1"); 
 
     //Branch if false
     branchEQ(execfile, a, b, label);
-    loadReg(execfile, dst, "$0");
+    loadReg(execfile, dst, "0");
     writeAsmBlock(execfile, label);
     writeAsmBlock(execfile, ":\n");
 
@@ -188,11 +188,11 @@ void neBool(FILE* execfile, int a, int b, int dst) {
     sprintf(label, "comp%i", comparisons++);
 
     //Sets the initial value for if false, then compares
-    loadReg(execfile, dst, "$1"); 
+    loadReg(execfile, dst, "1"); 
 
     //Branch if false
     branchNE(execfile, a, b, label);
-    loadReg(execfile, dst, "$0");
+    loadReg(execfile, dst, "0");
     writeAsmBlock(execfile, label);
     writeAsmBlock(execfile, ":\n");
 

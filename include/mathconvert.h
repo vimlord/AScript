@@ -8,7 +8,7 @@
  * calc     - A segment of code that contains the formula, which should have closure.
  * dst      - The address in memory where the result will be stored.
  */
-void pemdas(FILE* execfile, char* calc);
+void pemdas(FILE* execfile, char* calc, int nbytes);
 
 /**
  * Jumps to a label if the value of the conditional is true.
@@ -17,7 +17,7 @@ void pemdas(FILE* execfile, char* calc);
  * label - The label that will be jumped to on meeting the condition.
  * ptr   - The address where the result of computing cond can safely be stored.
  */
-void jumpIfTrue(FILE* execfile, char* cond, char* label);
+void jumpIfTrue(FILE* execfile, char* cond, char* label, int nbytes);
 
 /**
  * Jumps to a label if the value of the conditional is false.
@@ -26,4 +26,4 @@ void jumpIfTrue(FILE* execfile, char* cond, char* label);
  * label - The label that will be jumped to on meeting the condition.
  * ptr   - The address where the result of computing cond can safely be stored.
  */
-void jumpIfFalse(FILE* execfile, char* cond, char* label);
+void jumpIfFalse(FILE* execfile, char* cond, char* label, int nbytes);

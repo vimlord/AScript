@@ -73,7 +73,7 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
         //Since the variable is in the end slot, we can have
         //pemdas() push the values directly there.
         
-        pemdas(execfile, subline[i+1] ? &subline[i+1] : "0");
+        pemdas(execfile, subline[i+1] ? &subline[i+1] : "0", 1);
         
         stackPop(execfile, 16);
 
@@ -100,7 +100,7 @@ void processIfElse(FILE* execfile, char* subline, int tokenid) {
     char elseLabel[64];
     sprintf(elseLabel, "else%i", tokenid);
    
-    jumpIfFalse(execfile, condition, elseLabel);
+    jumpIfFalse(execfile, condition, elseLabel, 1);
     
     //writeAsmBlock(execfile, "\n");
 
@@ -174,7 +174,7 @@ void processWhileLoop(FILE* execfile, char* subline, int tokenid) {
     sprintf(endWhileLabel, "end%s", whileLabel);
 
     //If false, exit the loop
-    jumpIfFalse(execfile, condition, endWhileLabel);
+    jumpIfFalse(execfile, condition, endWhileLabel, 1);
     
     //Otherwise, execute
     //Gets the code block to run
@@ -266,7 +266,7 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
         //By default, no equals sign means that the value will be set to 0.
         while(tokidx[idx] && tokidx[idx] != '=') idx++;
         writeComment(execfile, "Computing value"); 
-        pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0"); //Compute the value
+        pemdas(execfile, tokidx[idx+1] ? &tokidx[idx+1] : "0", 1); //Compute the value
         writeComment(execfile, "Determining pointer address");
         
         //The access is done as an array
@@ -298,7 +298,7 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
         if(arrIdxStr) {
             writeComment(execfile, "Computing array index");
             //Then, we calculate the index
-            pemdas(execfile, arrIdxStr);
+            pemdas(execfile, arrIdxStr, 1);
             //Next, we pop the value off of the stack
             stackPop(execfile, 16);
 

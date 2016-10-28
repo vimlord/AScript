@@ -70,7 +70,7 @@ void loadStackAddressOf(FILE* execfile, char* var) {
     
     if(arrIndex) {
         //Compute the array index and store it in r16
-        pemdas(execfile, arrIndex);
+        pemdas(execfile, arrIndex, 1);
         stackPop(execfile, 16);
         
         //Goes to the address
