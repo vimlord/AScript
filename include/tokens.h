@@ -25,6 +25,11 @@ void processIfElse(FILE* execfile, char* subline, int tokenid);
  */
 void processWhileLoop(FILE* execfile, char* subline, int tokenid);
 
+/**
+ * Performs assignment to a byte.
+ */
+void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr);
+
 #endif
 
 
