@@ -14,7 +14,8 @@ char* TOKENS[] = {"if", "while", "byte", "ptr", ""};
 TokenProcess TOKFUNCS[] = {
     processIfElse,
     processWhileLoop,
-    processByte
+    processByte,
+    processPtr
 };
 
 //A singleton list that holds the program variables
@@ -48,6 +49,32 @@ int stackAddressOfVar(char* var) {
 
     return -1;
 
+}
+
+/**
+ * Returns the size of the variable type, or -1 if invalid.
+ */
+int sizeOfType(char* type) {
+    if (!strcmp(type, "byte"))
+         return 1;
+    else if (!strcmp(type, "ptr"))
+        return 2;
+    else
+        return -1;
+}
+
+int variableSizeOf(char* var) {
+    List list = getVars();
+    int i = 0, len = listSize(list);
+
+    while(i < len) {
+        VarFrame frame = (VarFrame) getFromList(list, i);
+        
+        if(!strcmp(var, frame->name)) {
+            return sizeOfType(frame->type);
+        } else i++;
+    }
+    return -1;
 }
 
 void loadStackAddressOf(FILE* execfile, char* var) {
@@ -181,7 +208,6 @@ void parseLine(FILE* execfile, char* line) {
         tokidx = strstr(line, TOKENS[i]);
         
         if(tokidx == line) {
-
             processToken(execfile, i,
                          &tokidx[strlen(TOKENS[i])]);
             //Nothing else needs to be done; return.
@@ -222,7 +248,7 @@ void parseLine(FILE* execfile, char* line) {
             if(!strcmp(varframe->type, "byte"))
                 processByteAssign(execfile, line, varname, arrIdxStr);
             else if(!strcmp(varframe->type, "ptr"))
-                processByteAssign(execfile, line, varname, arrIdxStr);
+                processPtrAssign(execfile, line, varname, arrIdxStr);
             free(variable);
             return;
         }
@@ -245,7 +271,7 @@ void processToken(FILE* execfile, int tokidx, char* subline) {
     int tokenid = -1;
 
     if(*subline == ' ') {
-        int i = 0;
+        int i = 1;
         while(subline[i] == ' ')
             i++;
         
@@ -254,7 +280,7 @@ void processToken(FILE* execfile, int tokidx, char* subline) {
     } else {
         tokenid = TOKEN_ID++;
     }
-    
+
     TOKFUNCS[tokidx](execfile, subline, tokenid);
 
 }

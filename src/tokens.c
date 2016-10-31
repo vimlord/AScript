@@ -206,7 +206,7 @@ void processPtr(FILE* execfile, char* subline, int tokenid) {
         sprintf(buffer, "Attempting to create ptr inside loop:\n%s\n", subline);
         throwWarning(buffer);
     }
-    
+
     //Get the length of the string
     int len = 0;
     while(subline[len] && subline[len] != ' ' && subline[len] != '=') len++;
@@ -216,16 +216,16 @@ void processPtr(FILE* execfile, char* subline, int tokenid) {
     while(++j < len)
         varname[j] = subline[j];
     varname[len] = '\0';
-
+    
     /* Adds the variable. A pointer is two bytes due to 16-bit architecture */
     addVariable(execfile, "ptr", varname, 2);
 
     int i = len;
-    while(subline[i] == ' '); i++;
-
+    while(subline[i] == ' ') i++;
+    
     if(subline[i] == '=') {
         while(subline[++i] == ' ');
-
+        
         //There should be something here. If not, throw an error.
         if(!subline[i]) {
             char buffer[64 + strlen(subline)];
@@ -238,10 +238,8 @@ void processPtr(FILE* execfile, char* subline, int tokenid) {
 
         } else {
             /* The value is a number */
-            int addrs = atoi(&subline[i+1]);
-            char buffer[32];
-            sprintf(buffer, "ldi yh, %i\nldi yl, %i\n", addrs/256, addrs%256);
-            writeAsmBlock(execfile, buffer);
+            pemdas(execfile, subline[i] ? &subline[i] : "0", 2);
+            return; //The returns to avoid redundant pop, only to repush
         }
 
 
@@ -283,27 +281,28 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
         int stkIdx = stackAddressOfVar(varname);
         if(stkIdx < 0) {
             //The variable does not exist on the stack.
-            printf("Error during compilation: A variable was not found.\n");
-            exit(EINVAL);
+            throwError("A variable was not found.\n");
         }
 
         /**
          * The index of the variable on the stack is then subtracted
          * from the pointer to the bottom of the stack.
          */
-        sprintf(addrBuffer, "ldi r16, %i\nsub yl, r16\n", stkIdx % 256);
+        sprintf(addrBuffer, "ldi r16, %i\nldi r17, %i\n", stkIdx % 256, stkIdx / 256);
         writeAsmBlock(execfile, addrBuffer);
-        
+        writeAsmBlock(execfile, "sub yl, r16\nsbc yh, r17\n");
+
         //Increments y by the array address.
         if(arrIdxStr) {
             writeComment(execfile, "Computing array index");
             //Then, we calculate the index
-            pemdas(execfile, arrIdxStr, 1);
+            pemdas(execfile, arrIdxStr, 2);
             //Next, we pop the value off of the stack
             stackPop(execfile, 16);
+            stackPop(execfile, 17);
 
             //Then, we need to add it to the zero memory address
-            writeAsmBlock(execfile, "add yl, r16\n");
+            writeAsmBlock(execfile, "add yl, r16\nadc yh, r17");
         } 
         
         writeComment(execfile, "Storing end result");
@@ -328,7 +327,8 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
 
     int i = 0;
     while(subline[++i] == ' ');
-
+    
+    /* In any case, the end result will be that the result is in y */
     if(subline[i] == '@') {
         //Get address of variable
         char* tmp = contentToOperator(&subline[i+1], ' ', '[', ']');
@@ -339,14 +339,13 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
         char buffer[64];
         sprintf(buffer, "ldi zh, %i\nldi zl, %i\n", val/256, val%256);
         writeAsmBlock(execfile, buffer);
-        //Put them into y
+        //Put the result into y
         writeAsmBlock(execfile, "ld yl, z+\nld yh, z+\n");
     } else {
-        //Get content of address
-        int val = atoi(&subline[i]);
-        char buffer[64];
-        sprintf(buffer, "ldi yh, %i\nldi yl, %i\n", val/256, val%256);
-        writeAsmBlock(execfile, buffer);
+        //Determine the value of the equality (there will be a two byte val)
+        pemdas(execfile, subline[i] ? &subline[1] : "0", 2);
+        //Pops the result into y
+        writeAsmBlock(execfile, "pop yl\npop yh\n");
     }
     
     //Get the assignment address

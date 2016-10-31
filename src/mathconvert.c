@@ -128,12 +128,13 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
 
     if(i >= 0) {
         //The variable exists on the stack frame
-
+        int varsize = variableSizeOf(variableName);
+        
         //Copies the stack pointer to y 
         writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
         
         char addrBuffer[64];
-
+        
         //Gets index on stack
         sprintf(addrBuffer, "ldi r16, %i\nsub yl, r16\n", i % 256);
         writeAsmBlock(execfile, addrBuffer);
@@ -142,25 +143,49 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
             writeComment(execfile, "Getting array index");
             //The access is done as an array
             
+            char arrayBuffer[10 + strlen(arrIdxStr)];
+
+            sprintf(arrayBuffer, "%i * (%s)", varsize, arrIdxStr);
+
             //First, we need the index
-            pemdas(execfile, arrIdxStr, nbytes);
+            pemdas(execfile, arrayBuffer, 2);
             //Next, we pop the value off of the stack
             stackPop(execfile, 16);
+            stackPop(execfile, 17);
 
             //Then, we need to add it to the zero memory address
-            addReg(execfile, 0x1d, 0x10); //The end result is that y now contains the address of the index
+            writeAsmBlock(execfile, "add yl, r16\nadc yh, r17\n"); //The end result is that y now contains the address of the index
         }
-        
-        //Copies the variable's value from the address in y into r16.
-        writeAsmBlock(execfile, "ld r16, y\n");
+
+        //Copies the variable's value from the address in y into r16 and on.
+        i = 0;
+        while(i < nbytes) {
+            if(i < varsize)
+                sprintf(addrBuffer, "ld r%i, y+\n", 16+i);
+            else
+                sprintf(addrBuffer, "ldi r%i, 0\n", 16+i);
+
+            writeAsmBlock(execfile, addrBuffer);
+            i++;
+        }
 
         //Then, push the value onto the stack.
-        stackPush(execfile, 16);
+        while(i--)
+            stackPush(execfile, 16+i);
         return;
     }
     
     //If the program reached this point, then there has to be a scalar here.
     //It will be stored in dst
+    int value = atoi(calc);
+    i = nbytes;
+    while(i--) {
+        int insert = (value >> (8 * i)) % 256;
+        char buff[64];
+        sprintf(buff, "ldi r16, %i\npush r16\n", insert);
+        writeAsmBlock(execfile, buff);
+    }
+
     loadReg(execfile, 16, calc);
     stackPush(execfile, 16);
 }
