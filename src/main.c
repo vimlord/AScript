@@ -12,10 +12,9 @@
 int main(int argc, char* argv[]) {
 
     //If no file is provided, immediately exit w/ an error message.
-    
     char* INPUTNAME = NULL;
     char* OUTPUTNAME = NULL;
-
+    
     //Parse through user arguments
     int i = 1;
     while(i < argc) {

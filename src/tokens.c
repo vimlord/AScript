@@ -228,9 +228,7 @@ void processPtr(FILE* execfile, char* subline, int tokenid) {
         
         //There should be something here. If not, throw an error.
         if(!subline[i]) {
-            char buffer[64 + strlen(subline)];
-            sprintf(buffer, "Attempting to assign value to new ptr without providing value.\n%s\n", subline);
-            throwError(buffer);
+            throwError("Attempting to assign value to new ptr without providing value.\n%s\n", subline);
         } else if(subline[i] == '@') {
             char* tmp = contentToOperator(&subline[i+1], ' ', '[', ']');
             loadStackAddressOf(execfile, tmp); 
@@ -320,9 +318,7 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
     while(*subline && *subline != '=') subline = &subline[1];
     
     if(!(*subline)) {
-        char buffer[56 + strlen(line)];
-        sprintf(buffer, "Pointer without assignment.\n%s\n", strstr(line, varname));
-        throwError(buffer);
+        throwError("Pointer without assignment.\n%s\n", strstr(line, varname));
     }
 
     int i = 0;

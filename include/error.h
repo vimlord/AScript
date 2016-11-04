@@ -32,21 +32,21 @@ int getErrorFlag(int i);
  *
  * mssg - The error message to print.
  */
-void throwError(char* mssg);
+void throwError(char* mssg, ...);
 
 /**
  * Throws a warning; prints the given message as advice to the user.
  *
  * mssg - The warning to give.
  */
-void throwWarning(char* mssg);
+void throwWarning(char* mssg, ...);
 
 /**
  * Throws a debug message; prints the given message with a warning.
  *
  * mssg - The message to display.
  */
-void throwDebug(char* mssg);
+void throwDebug(char* mssg, ...);
 
 #endif
 
