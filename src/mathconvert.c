@@ -195,15 +195,16 @@ void jumpIfTrue(FILE* execfile, char* cond, char* label, int nbytes) {
     writeComment(execfile, "Compute conditional");
     pemdas(execfile, cond, nbytes);
     
-    writeComment(execfile, "Get values");
-    //Copies the value into registers
-    stackPop(execfile, 16);
-    loadReg(execfile, 17, "$0");
+    loadReg(execfile, 17, "0");
+    int i = 0;
+    while(i < nbytes) {
+        //Copies the value into registers
+        stackPop(execfile, 16);
 
-    writeComment(execfile, "Branch if nonzero");
-    //Branches if equal to zero (0 is false)
-    branchNE(execfile, 0x10, 0x11, label);
-
+        //Branches if equal to zero (0 is false)
+        branchNE(execfile, 0x10, 0x11, label);
+        i++;
+    }
 
 }
 
@@ -211,13 +212,16 @@ void jumpIfFalse(FILE* execfile, char* cond, char* label, int nbytes) {
     
     writeComment(execfile, "Compute conditional");
     pemdas(execfile, cond, nbytes);
-    
-    writeComment(execfile, "Get values");
-    //Copies the value into registers
-    stackPop(execfile, 16);
-    loadReg(execfile, 17, "0");
 
-    writeComment(execfile, "Branch if zero");
-    //Branches if equal to zero (0 is false)
-    branchEQ(execfile, 0x10, 0x11, label);
+    loadReg(execfile, 17, "0");
+    int i = 0;
+    while(i < nbytes) {
+        //Copies the value into registers
+        stackPop(execfile, 16);
+
+        //Branches if equal to zero (0 is false)
+        branchEQ(execfile, 0x10, 0x11, label);
+        i++;
+    }
+
 }
