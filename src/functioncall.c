@@ -31,6 +31,8 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
         pemdas(execfile, val, 2);
         
         size += 2;
+
+        free(val);
     }
     
     //Finalize the stack frame by pushing x_old and then storing sp in x.

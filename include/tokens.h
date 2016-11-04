@@ -35,6 +35,10 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
  */
 void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr);
 
+/**
+ * Handles the 'function' keyword.
+ */
+void processFunction(FILE* execfile, char* subline, int tokenid);
 
 #endif
 

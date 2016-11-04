@@ -16,8 +16,6 @@ struct var_frame {
 
 typedef struct var_frame* VarFrame;
 
-char* TOKENS[5]; 
-
 List getVars();
 
 int getLoopDepth();

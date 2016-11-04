@@ -360,5 +360,62 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
 
 }
 
+void processFunction(FILE* execfile, char* subline, int tokenid) {
+    
+    int len = 0;
+    while(subline[len] != ' ' && subline[len]) len++;
+
+    if(!subline[len]) {
+        throwError("Function must have return type.\nfunction %s\n", subline);
+    }
+    
+    //The return type
+    CMP_TOK returnType = (char*) malloc((len+1) * sizeof(char));
+    int i = 0;
+    while(i < len) {
+        returnType[i] = subline[i];
+        i++;
+    }
+    returnType[len] = '\0';
+    
+    char* func = &subline[len+1];
+    while(*func == ' ') func = &func[1];
+
+    len = 0;
+    while(func[len] != ' ' && func[len]) len++;
+
+    if(!subline[len]) {
+        throwError("Function must have name.\nfunction %s\n", subline);
+    }
+    
+    //The function name
+    char* functionName = (char*) malloc((len+1) * sizeof(char));
+    i = 0;
+    while(i < len) {
+        functionName[i] = func[i];
+        i++;
+    }
+    functionName[len] = '\0';
+
+    char* par = &func[len+1];
+    while(subline[len] != ' ' && subline[len]) len++;
+    
+    if(subline[len] != '(') {
+        throwError("Function name should be followed by arguments in parentheses\nfunction %s\n", subline);
+    }
+    
+    //The parameter list
+    char* params = closureContent(&par[1], '(', ')');
+
+    len = 1 + strlen(params);
+    while(par[len] != '{') len++;
+
+    //The code inside the function
+    char* codeBlock = closureContent(&par[len+1], '(', ')');
+
+    
+
+}
+
 
 
