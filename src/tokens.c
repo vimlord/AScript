@@ -405,8 +405,14 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     //The code inside the function
     char* codeBlock = closureContent(&par[len+1], '{', '}');
     
-    //Writes the function label
-    writeAsmBlock(execfile, "function_"); writeAsmBlock(execfile, functionName); writeAsmBlock(execfile, ":\n");
+    writeAsmBlock(execfile, "jmp functionend_");
+    writeAsmBlock(execfile, functionName);
+    writeAsmBlock(execfile, "\n");
+
+    //Writes the function arrival label
+    writeAsmBlock(execfile, "function_");
+    writeAsmBlock(execfile, functionName);
+    writeAsmBlock(execfile, ":\n");
     
     //Get the number of arguments
     i = 0;
@@ -444,6 +450,13 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     
     //Return to the previous point of operation in the assembly code
     writeAsmBlock(execfile, "ret\n");
+
+    //Special label used to skip over the function 
+    writeAsmBlock(execfile, "functionend_");
+    writeAsmBlock(execfile, functionName);
+    writeAsmBlock(execfile, ":\n");
+    
+
 
 }
 
