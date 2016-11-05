@@ -448,7 +448,8 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     //Executes the code
     parseSegment(execfile, codeBlock);
     
-    //Return to the previous point of operation in the assembly code
+    //Return to the previous point of operation in the
+    //assembly code if the program has not already done so.
     writeAsmBlock(execfile, "ret\n");
 
     //Special label used to skip over the function 
