@@ -40,6 +40,11 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
  */
 void processFunction(FILE* execfile, char* subline, int tokenid);
 
+/**
+ * Handles the return keyword.
+ */
+void handleReturn(FILE* execfile, char* subline, int tokenid);
+
 #endif
 
 

@@ -418,9 +418,9 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     }
 
     if(compTok("void", returnType)) {
-        setCompilerStackTop(-2*(parCount+2));
+        setCompilerStackTop(-2*(parCount+3));
         addVariable(execfile, returnType, "return", 2);
-    } else setCompilerStackTop(-2*(parCount+1));
+    } else setCompilerStackTop(-2*(parCount+2));
     
     //All of the parameters should be in place. So, claim the spaces.
     i = 0;
@@ -442,6 +442,31 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     writeAsmBlock(execfile, "ret\n");
 
 }
+
+
+void handleReturn(FILE* execfile, char* subline, int tokenid) {
+    //The return space is always two bytes, so perform
+    //two byte computations. Puts the return value into the
+    //return slot, which will be on the top of the stack
+    //after returning from the function.
+    processPtrAssign(execfile, subline, "return", "0");
+    
+    //Change the stack pointer to point back to the beginning
+    int size = ((VarFrame)getFromList(getVars(), listSize(getVars()) - 1))->addr + 1;
+    writeAsmBlock(execfile, "in r16, spl\nin r17,sph\n");
+    
+    char buff[256];
+    sprintf(buff, "ldi r18, %i\nldi r19, %i\n", size%256, size/256);
+    writeAsmBlock(execfile, buff);
+    writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
+    writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
+
+    //Performs the return.
+    writeAsmBlock(execfile, "ret\n");
+    
+
+}
+
 
 
 

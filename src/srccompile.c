@@ -10,13 +10,14 @@
 #include <string.h>
 #include <stdio.h>
 
-char* TOKENS[] = {"if", "while", "byte", "ptr", "function", ""};
+char* TOKENS[] = {"if", "while", "byte", "ptr", "function", "return", ""};
 TokenProcess TOKFUNCS[] = {
     processIfElse,
     processWhileLoop,
     processByte,
     processPtr,
-    processFunction
+    processFunction,
+    handleReturn
 };
 
 //A singleton list that holds the program variables
