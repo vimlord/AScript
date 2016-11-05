@@ -14,13 +14,6 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
     int nbytes = 1; //The size of the list, in bytes (1 * size)
     int i = 0; //The index of the variable name's first char
     
-    //Creating variables in a loop might not be appreciated
-    if(getLoopDepth() > 1) {
-        char buffer[50 + strlen(subline)];
-        sprintf(buffer, "Attempting to create byte inside loop:\n%s\n", subline);
-        throwWarning(buffer);
-    }
-
     if(*subline == '[') {
         //Get the variable size from the string
         char* content = closureContent(&subline[1], '[', ']');
@@ -151,7 +144,6 @@ void processIfElse(FILE* execfile, char* subline, int tokenid) {
 
 void processWhileLoop(FILE* execfile, char* subline, int tokenid) {
 
-
     //Get the while condition
     int len = 0;
     while(subline[len] != '(') len++;
@@ -200,13 +192,6 @@ void processWhileLoop(FILE* execfile, char* subline, int tokenid) {
 
 void processPtr(FILE* execfile, char* subline, int tokenid) {
     
-    //Creating variables in a loop might not be appreciated
-    if(getLoopDepth() > 1) {
-        char buffer[50 + strlen(subline)];
-        sprintf(buffer, "Attempting to create ptr inside loop:\n%s\n", subline);
-        throwWarning(buffer);
-    }
-
     //Get the length of the string
     int len = 0;
     while(subline[len] && subline[len] != ' ' && subline[len] != '=') len++;
@@ -361,6 +346,11 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
 }
 
 void processFunction(FILE* execfile, char* subline, int tokenid) {
+    if(getLoopDepth() != 0) {
+        char buffer[50 + strlen(subline)];
+        sprintf(buffer, "Attempting to create ptr inside loop:\n%s\n", subline);
+        throwWarning(buffer);
+    }
     
     int len = 0;
     while(subline[len] != ' ' && subline[len]) len++;
@@ -412,8 +402,44 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
 
     //The code inside the function
     char* codeBlock = closureContent(&par[len+1], '(', ')');
-
     
+    //Writes the function label
+    writeAsmBlock(execfile, "function_"); writeAsmBlock(execfile, functionName); writeAsmBlock(execfile, "\n");
+    
+    //Get the number of arguments
+    i = 0;
+    int parCount = 0;
+    while(params[i]) {
+        if(!parCount && params[i] != ' ')
+            parCount++;
+        if(params[i] == ',')
+            parCount++;
+        i++;
+    }
+
+    if(compTok("void", returnType)) {
+        setCompilerStackTop(-2*(parCount+2));
+        addVariable(execfile, returnType, "return", 2);
+    } else setCompilerStackTop(-2*(parCount+1));
+    
+    //All of the parameters should be in place. So, claim the spaces.
+    i = 0;
+    while(i < parCount) {
+        int j = 0;
+        while(params[j] == ' ') j++;
+        char* param = contentToOperator(&params[j], ',', ' ', ' ');
+        char* tp = contentToOperator(param, ' ', ' ', ' ');
+        char* nm = contentToOperator(&param[strlen(tp) + 1], '\0', '\0', '\0');
+        addVariable(execfile, tp, nm, 2);
+
+        free(param);
+    }
+
+    //Executes the code
+    parseSegment(execfile, codeBlock);
+    
+    //Return to the previous point of operation in the assembly code
+    writeAsmBlock(execfile, "ret\n");
 
 }
 

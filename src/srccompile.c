@@ -21,8 +21,11 @@ TokenProcess TOKFUNCS[] = {
 
 //A singleton list that holds the program variables
 List VARIABLES = NULL;
+int REL_STK = 0; //Holds the relative position of the next item on the stack frame
 
 int LOOP_DEPTH = -1;
+int LOOP_DEPTH_GLOBAL = 0;
+int LOOP_DEPTH_FUNCTION = 1;
 
 List getVars() {
     return VARIABLES ? VARIABLES : (VARIABLES = makeList());
@@ -114,15 +117,16 @@ int compTok(CMP_TOK a, CMP_TOK b) {
     return strcmp(a, b);
 }
 
+void setCompilerStackTop(int idx) {
+    REL_STK = idx;
+}
 
 int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
-    
-    static int vars = 0;
     
     loadReg(execfile, 16, "0");
 
     //The address of the new memory
-    int ptr = (vars += nbytes) - 1;
+    int ptr = (REL_STK += nbytes) - 1;
     
     VarFrame frame = (VarFrame) malloc(sizeof(struct var_frame));
     frame->name = varname;
@@ -164,7 +168,8 @@ void parseSegment(FILE* execfile, char* code) {
 
     int endvars = listSize(getVars());
     
-    if(LOOP_DEPTH && endvars > numvars) {
+    //Remove variables if necessary in a function based on scope.
+    if(LOOP_DEPTH >= LOOP_DEPTH_FUNCTION && endvars > numvars) {
 
         while(endvars > numvars) {
             VarFrame v = remFromList(getVars(), endvars-1);

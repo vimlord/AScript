@@ -26,6 +26,7 @@ int stackAddressOfVar(char* var);
 void loadStackAddressOf(FILE* execfile, char* var); //Loads the address into y
 
 int compTok(CMP_TOK a, CMP_TOK b);
+void setCompilerStackTop(int idx);
 
 /**
  * Adds a variable to the stack.
