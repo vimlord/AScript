@@ -92,17 +92,17 @@ void processIfElse(FILE* execfile, char* subline, int tokenid) {
     //Creates the text for the else label
     char elseLabel[64];
     sprintf(elseLabel, "else%i", tokenid);
-   
-    jumpIfFalse(execfile, condition, elseLabel, 1);
     
-    //writeAsmBlock(execfile, "\n");
+    jumpIfFalse(execfile, condition, elseLabel, 1);
 
+    //writeAsmBlock(execfile, "\n");
+    
     //Otherwise, execute
     //Gets the code block to run
     while(subline[len] != '{') len++;
 
     char* function = closureContent(&subline[len+1], '{', '}');
-
+    
     parseSegment(execfile, function);
     
     //Generate the alternate function
@@ -305,8 +305,8 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
     if(!(*subline)) {
         throwError("Pointer without assignment.\n%s\n", strstr(line, varname));
     }
-
-    int i = 0;
+    
+    int i = -1;
     while(subline[++i] == ' ');
     
     /* In any case, the end result will be that the result is in y */
@@ -331,18 +331,19 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
     
     //Get the assignment address
     int stkptr = stackAddressOfVar(varname);
-    writeAsmBlock(execfile, "mov zh, xh\nmov zl, xl\n");
+    if(stkptr < 0) stkptr += 0x10000;
 
+    writeAsmBlock(execfile, "mov zh, xh\nmov zl, xl\n");
+    
     char buffer[64];
-    sprintf(buffer, "ldi r16, %i\nsub zl, r16", stkptr % 256);
+    sprintf(buffer, "ldi r16, %i\nsub zl, r16\n", stkptr % 256);
     writeAsmBlock(execfile, buffer);
 
-    sprintf(buffer, "ldi r16, %i\nsbc zl, r16", stkptr / 256);
+    sprintf(buffer, "ldi r16, %i\nsbc zl, r16\n", stkptr / 256);
     writeAsmBlock(execfile, buffer);
 
     //Perform assignment
     writeAsmBlock(execfile, "st z+, yl\nst z, yh\n");
-
 }
 
 void processFunction(FILE* execfile, char* subline, int tokenid) {
@@ -372,7 +373,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     while(*func == ' ') func = &func[1];
 
     len = 0;
-    while(func[len] != ' ' && func[len]) len++;
+    while(func[len] != ' ' && func[len] && func[len] != '(') len++;
 
     if(!subline[len]) {
         throwError("Function must have name.\nfunction %s\n", subline);
@@ -387,10 +388,11 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     }
     functionName[len] = '\0';
 
-    char* par = &func[len+1];
-    while(subline[len] != ' ' && subline[len]) len++;
-    
-    if(subline[len] != '(') {
+    char* par = &func[len];
+
+    while(*par != '(' && *par) par = &par[1];
+
+    if(*par != '(') {
         throwError("Function name should be followed by arguments in parentheses\nfunction %s\n", subline);
     }
     
@@ -401,10 +403,10 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     while(par[len] != '{') len++;
 
     //The code inside the function
-    char* codeBlock = closureContent(&par[len+1], '(', ')');
+    char* codeBlock = closureContent(&par[len+1], '{', '}');
     
     //Writes the function label
-    writeAsmBlock(execfile, "function_"); writeAsmBlock(execfile, functionName); writeAsmBlock(execfile, "\n");
+    writeAsmBlock(execfile, "function_"); writeAsmBlock(execfile, functionName); writeAsmBlock(execfile, ":\n");
     
     //Get the number of arguments
     i = 0;
@@ -416,7 +418,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
             parCount++;
         i++;
     }
-
+    
     if(compTok("void", returnType)) {
         setCompilerStackTop(-2*(parCount+3));
         addVariable(execfile, returnType, "return", 2);
@@ -433,8 +435,10 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
         addVariable(execfile, tp, nm, 2);
 
         free(param);
-    }
 
+        i++;
+    }
+    
     //Executes the code
     parseSegment(execfile, codeBlock);
     
@@ -449,22 +453,37 @@ void handleReturn(FILE* execfile, char* subline, int tokenid) {
     //two byte computations. Puts the return value into the
     //return slot, which will be on the top of the stack
     //after returning from the function.
-    processPtrAssign(execfile, subline, "return", "0");
-    
+    int i = 0;
+    while(subline[i]) {
+        if(subline[i] != ' ') {
+            writeComment(execfile, "Compute return value");
+            char buff[strlen(subline) + 16];
+            sprintf(buff, "return = %s", subline);
+            processPtrAssign(execfile, buff, "return", "0");
+            break;
+        } i++;
+    }
+
     //Change the stack pointer to point back to the beginning
     int size = ((VarFrame)getFromList(getVars(), listSize(getVars()) - 1))->addr + 1;
-    writeAsmBlock(execfile, "in r16, spl\nin r17,sph\n");
     
-    char buff[256];
-    sprintf(buff, "ldi r18, %i\nldi r19, %i\n", size%256, size/256);
-    writeAsmBlock(execfile, buff);
-    writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
-    writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
+    
+    writeComment(execfile, "Deep end return computations");
+    if(size > 0) { //If the size is positive, there are values that need skimming
 
+        //Get the current stack pointer
+        writeAsmBlock(execfile, "in r16, spl\nin r17,sph\n");
+        
+        //Subtract the size of the frame stack from the pointer
+        char buff[256];
+        sprintf(buff, "ldi r18, %i\nldi r19, %i\n", size%256, size/256);
+        writeAsmBlock(execfile, buff);
+        writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
+        writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
+    }
     //Performs the return.
     writeAsmBlock(execfile, "ret\n");
-    
-
+   
 }
 
 

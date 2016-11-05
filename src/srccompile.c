@@ -52,7 +52,7 @@ int stackAddressOfVar(char* var) {
         i++;
     }
 
-    return -1;
+    return -131072;
 
 }
 
@@ -65,7 +65,23 @@ int sizeOfType(char* type) {
     else if (!strcmp(type, "ptr"))
         return 2;
     else
-        return -1;
+        return -131072; //Outside the range of 16-bit address space
+}
+
+char* variableTypeOf(char* var) {
+    List list = getVars();
+    int i = 0, len = listSize(list);
+
+    while(i < len) {
+        VarFrame frame = (VarFrame) getFromList(list, i);
+
+        if(!strcmp(var, frame->name))
+            return frame->type;
+
+        i++;
+    }
+
+    return NULL;
 }
 
 int variableSizeOf(char* var) {
@@ -141,6 +157,7 @@ int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
 }
 
 void parseSegment(FILE* execfile, char* code) {
+    
     char* nextLine = NULL;
     char* front = code;
     
@@ -202,8 +219,6 @@ void parseLine(FILE* execfile, char* line) {
         writeComment(execfile, line);
     }
     
-    //printf("LINE: '%s'\n", line);
-
     //Will test for the index of the first token
     char* tokidx = NULL;
     

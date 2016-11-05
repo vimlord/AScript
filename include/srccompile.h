@@ -21,6 +21,7 @@ List getVars();
 int getLoopDepth();
 
 int sizeOfType(char* type);
+char* variableTypeOf(char* var);
 int variableSizeOf(char* var);
 int stackAddressOfVar(char* var);
 void loadStackAddressOf(FILE* execfile, char* var); //Loads the address into y

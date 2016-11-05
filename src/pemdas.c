@@ -1,6 +1,7 @@
 #include "pemdas.h"
 
 #include "asmcommands.h"
+#include "error.h"
 #include "srccompile.h"
 
 #include <string.h>
@@ -173,7 +174,7 @@ void boolEqOperation(FILE* execfile, char* partA, char* partB, int n) {
     
     if(*partB != '=') {
         //Bad input
-        printf("Error during compilation: Invalid use of arithmetic operators.\n");
+        throwError("Error during compilation: Invalid use of arithmetic operators.\n");
         exit(EINVAL);
     }
     char label[64];

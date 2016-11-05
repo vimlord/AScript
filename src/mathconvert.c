@@ -1,6 +1,8 @@
 #include "mathconvert.h"
 
 #include "asmcommands.h"
+#include "error.h"
+#include "functioncall.h"
 #include "pemdas.h"
 #include "srccompile.h"
 #include "strmanip.h"
@@ -9,7 +11,7 @@
 #include <stdlib.h>
 
 void pemdas(FILE* execfile, char* calc, int nbytes) {
-
+    
     if(!(*calc)) {
         //Fills the address with 0 if the string is empty.
         loadReg(execfile, 16, "0");
@@ -111,22 +113,35 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
 
     //Finds length of the variable name 
     i = 0;
-    while(calc[i] && calc[i] != ' ' && calc[i] != '[') i++;
+    while(calc[i] && calc[i] != ' ' && calc[i] != '[' && calc[i] != '(') i++;
     char* variableName = (char*) malloc((i+1) * sizeof(char));
     int j = -1;
     while(++j < i)
         variableName[j] = calc[j];
     variableName[i] = '\0';
+    
+    char* varType = variableTypeOf(variableName);
+
+    if(varType && !strcmp(varType, "function")) {
+        //A function call
+        while(calc[j++] != '(');
+        char* funcParams = closureContent(&calc[j], '(', ')');
+        
+        performFunctionCall(execfile, funcParams, "ptr", variableName);
+
+        return;
+    }
 
     //Gets the array index, if there is one
     char* arrIdxStr = NULL;
     if(calc[i] == '[')
         arrIdxStr = closureContent(&calc[i+1], '[', ']');
-
+    
     //i will hold the index in the stack of the variable
     i = stackAddressOfVar(variableName);
-
-    if(i >= 0) {
+    
+    if(i > -65536) {
+    
         //The variable exists on the stack frame
         int varsize = variableSizeOf(variableName);
         
@@ -136,7 +151,13 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
         char addrBuffer[64];
         
         //Gets index on stack
-        sprintf(addrBuffer, "ldi r16, %i\nsub yl, r16\n", i % 256);
+        if(i > 0)
+            sprintf(addrBuffer, "ldi r16, %i\nsub yl, r16\n", i % 256);
+        else {
+            while(i < 0) i += 256;
+            sprintf(addrBuffer, "ldi r16, %i\nadd yl, r16\n", (256-i));
+        }
+
         writeAsmBlock(execfile, addrBuffer);
 
         if(arrIdxStr) {
@@ -188,6 +209,7 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
 
     loadReg(execfile, 16, calc);
     stackPush(execfile, 16);
+
 }
 
 void jumpIfTrue(FILE* execfile, char* cond, char* label, int nbytes) {
