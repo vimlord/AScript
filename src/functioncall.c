@@ -36,6 +36,7 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
     }
     
     //Finalize the stack frame by pushing x_old and then storing sp in x.
+    writeComment(execfile, "Saves old stack pointer for later");
     writeAsmBlock(execfile, "push xh\npush xl\nin xh, sph\nin xl, spl\n");
 
     return size;
@@ -61,14 +62,18 @@ void finalizeReturn(FILE* execfile, int size, CMP_TOK type) {
     //At this point, the stack pointer should point to the high bit of x_old on the stack.
      
     //Restore x
+    writeComment(execfile, "Restoring old x");
     writeAsmBlock(execfile, "pop xl\npop xh\n");
     
     //Pops the values from the stack.
-    int i = 0;
-    while(i < size) {
-        stackPop(execfile, 16);
-        i++;
-    }
+    writeAsmBlock(execfile, "in r16, spl\nin r17, sph\n");
+    
+    
+    char buff[64];
+    sprintf(buff, "ldi r18, %i\nldi r19, %i\n", size%256, size/256);
+    writeAsmBlock(execfile, buff);
+
+    writeAsmBlock(execfile, "sub r16, r18\nsbc r17, r19\nout spl, r16\nout sph, r17\n");
 
     //All that should be left is the return value, which should be at the top of the stack.
 
