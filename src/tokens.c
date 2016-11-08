@@ -451,13 +451,11 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     //Return to the previous point of operation in the
     //assembly code if the program has not already done so.
     writeAsmBlock(execfile, "ret\n");
-
+    
     //Special label used to skip over the function 
     writeAsmBlock(execfile, "functionend_");
     writeAsmBlock(execfile, functionName);
     writeAsmBlock(execfile, ":\n");
-    
-
 
 }
 

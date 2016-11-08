@@ -118,6 +118,9 @@ int main(int argc, char* argv[]) {
     writeAsmBlock(execdata, "out sph, xh\n");
     writeAsmBlock(execdata, "ldi xl, low(RAMEND)\n");
     writeAsmBlock(execdata, "out spl, xl\n");
+    
+    //Automatically call main()
+    writeAsmBlock(execdata, "jmp function_main\n");
 
     writeAsmBlock(execdata, "\n");
 
