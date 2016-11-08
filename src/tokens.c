@@ -347,11 +347,6 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
 }
 
 void processFunction(FILE* execfile, char* subline, int tokenid) {
-    if(getLoopDepth() != 0) {
-        char buffer[50 + strlen(subline)];
-        sprintf(buffer, "Attempting to create ptr inside loop:\n%s\n", subline);
-        throwWarning(buffer);
-    }
     
     int len = 0;
     while(subline[len] != ' ' && subline[len]) len++;
