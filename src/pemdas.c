@@ -52,6 +52,7 @@ void subOperation(FILE* execfile, char* partA, char* partB, int n) {
     while(i < n) {
         char buff[64];
         sprintf(buff, "sbc %i, %i\n", 16+i, 16+i+n);
+        i++;
     }
     
     //Push to the stack

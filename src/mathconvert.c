@@ -28,8 +28,6 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
         return;
     }
     
-    //printf("CALC: %s\n", calc);
-
     //Get the index of \0
     int i = 0;
     while(calc[i] != '\0') i++;
@@ -121,14 +119,15 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
     variableName[i] = '\0';
     
     char* varType = variableTypeOf(variableName);
-
+    
     if(varType && !strcmp(varType, "function")) {
+
         //A function call
         while(calc[j++] != '(');
         char* funcParams = closureContent(&calc[j], '(', ')');
         
         performFunctionCall(execfile, funcParams, "ptr", variableName);
-
+        
         return;
     }
 
@@ -136,7 +135,7 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
     char* arrIdxStr = NULL;
     if(calc[i] == '[')
         arrIdxStr = closureContent(&calc[i+1], '[', ']');
-    
+
     //i will hold the index in the stack of the variable
     i = stackAddressOfVar(variableName);
     
@@ -200,7 +199,7 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
     //It will be stored in dst
     int value = atoi(calc);
     i = nbytes;
-    while(i--) {
+    while(i-- > 0) {
         int insert = (value >> (8 * i)) % 256;
         char buff[64];
         sprintf(buff, "ldi r16, %i\npush r16\n", insert);

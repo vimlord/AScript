@@ -218,7 +218,7 @@ void parseLine(FILE* execfile, char* line) {
     else {
         writeComment(execfile, line);
     }
-    
+
     //Will test for the index of the first token
     char* tokidx = NULL;
     

@@ -56,7 +56,7 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
     i += len; 
     
     //Adds the variable.
-    /*int valIdx = */addVariable(execfile, "byte", varname, nbytes);
+    addVariable(execfile, "byte", varname, nbytes);
 
     //If followed by an equal sign, include a definition for the variable.
     while(subline[i] == ' ') i++;
@@ -440,6 +440,8 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
         i++;
     }
     
+    addVariable(execfile, "function", functionName, 0);
+
     //Executes the code
     parseSegment(execfile, codeBlock);
     

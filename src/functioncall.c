@@ -29,12 +29,14 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
         //Finds and adds the next parameter.
         char* val = contentToOperator(str, ',', '(', ')');
         pemdas(execfile, val, 2);
-        
+
+        str = &str[strlen(val)+1];
+
         size += 2;
 
         free(val);
     }
-    
+
     //Finalize the stack frame by pushing x_old and then storing sp in x.
     writeComment(execfile, "Saves old stack pointer for later");
     writeAsmBlock(execfile, "push xh\npush xl\nin xh, sph\nin xl, spl\n");
