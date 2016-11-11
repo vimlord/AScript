@@ -140,6 +140,12 @@ void setCompilerStackTop(int idx) {
 
 int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     
+    /*
+    if(variableTypeOf(varname)) {
+        //The variable already exists
+        throwError("Attempting to reinitialize variable '%s %s'\n", type, varname);
+    }*/
+
     //The address of the new memory
     int ptr = (REL_STK += nbytes) - 1;
     
@@ -207,6 +213,8 @@ void parseSegment(FILE* execfile, char* code) {
     }
     LOOP_DEPTH--;
 
+    //printf("Down to depth %i\n", LOOP_DEPTH);
+
 }
 
 void parseLine(FILE* execfile, char* line) {
@@ -216,6 +224,8 @@ void parseLine(FILE* execfile, char* line) {
     else {
         writeComment(execfile, line);
     }
+    
+    //printf("LINE: '%s'\n", line);
 
     //Will test for the index of the first token
     char* tokidx = NULL;

@@ -347,7 +347,7 @@ void processPtrAssign(FILE* execfile, char* line, char* varname, char* arrIdxStr
 }
 
 void processFunction(FILE* execfile, char* subline, int tokenid) {
-    
+
     int len = 0;
     while(subline[len] != ' ' && subline[len]) len++;
 
@@ -399,7 +399,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
 
     //The code inside the function
     char* codeBlock = closureContent(&par[len+1], '{', '}');
-    
+
     writeAsmBlock(execfile, "jmp functionend_");
     writeAsmBlock(execfile, functionName);
     writeAsmBlock(execfile, "\n");
@@ -439,7 +439,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
 
         i++;
     }
-    
+     
     addVariable(execfile, "function", functionName, 0);
 
     //Executes the code
@@ -453,6 +453,11 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     writeAsmBlock(execfile, "functionend_");
     writeAsmBlock(execfile, functionName);
     writeAsmBlock(execfile, ":\n");
+    
+    /**
+     * TODO Free each parameter (parCount of them), plus the return 
+     * value if one exists. They will be on top of getVars()/
+     */
 
 }
 
