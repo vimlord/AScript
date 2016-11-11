@@ -140,8 +140,6 @@ void setCompilerStackTop(int idx) {
 
 int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     
-    loadReg(execfile, 16, "0");
-
     //The address of the new memory
     int ptr = (REL_STK += nbytes) - 1;
     
