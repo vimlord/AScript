@@ -458,6 +458,14 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
      * TODO Free each parameter (parCount of them), plus the return 
      * value if one exists. They will be on top of getVars()/
      */
+    i = compTok("void", returnType) ? -1 : 0;
+    while(i < parCount) {
+        VarFrame v = remFromList(getVars(), listSize(getVars()) - 1);
+        free(v->name);
+        v->addr = 0;
+        free(v);
+        i++;
+    }
 
 }
 

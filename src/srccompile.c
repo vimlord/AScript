@@ -140,11 +140,10 @@ void setCompilerStackTop(int idx) {
 
 int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     
-    /*
     if(variableTypeOf(varname)) {
         //The variable already exists
         throwError("Attempting to reinitialize variable '%s %s'\n", type, varname);
-    }*/
+    }
 
     //The address of the new memory
     int ptr = (REL_STK += nbytes) - 1;
@@ -196,6 +195,7 @@ void parseSegment(FILE* execfile, char* code) {
         while(endvars > numvars) {
             VarFrame v = remFromList(getVars(), endvars-1);
             free(v->name);
+            v->addr = 0;
             free(v);
             endvars--;
         }
