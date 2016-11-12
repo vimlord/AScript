@@ -454,10 +454,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     writeAsmBlock(execfile, functionName);
     writeAsmBlock(execfile, ":\n");
     
-    /**
-     * TODO Free each parameter (parCount of them), plus the return 
-     * value if one exists. They will be on top of getVars()/
-     */
+    //Removes the vars from the list of known variables.
     i = compTok("void", returnType) ? -1 : 0;
     while(i < parCount) {
         VarFrame v = remFromList(getVars(), listSize(getVars()) - 1);
