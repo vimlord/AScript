@@ -56,6 +56,7 @@ void processByte(FILE* execfile, char* subline, int tokenid) {
     i += len; 
     
     //Adds the variable.
+    writeAsmBlock(execfile, "; Adding variable "); writeAsmBlock(execfile, varname); writeAsmBlock(execfile, "\n");
     addVariable(execfile, "byte", varname, nbytes);
 
     //If followed by an equal sign, include a definition for the variable.
@@ -399,7 +400,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
 
     //The code inside the function
     char* codeBlock = closureContent(&par[len+1], '{', '}');
-
+    
     writeAsmBlock(execfile, "jmp functionend_");
     writeAsmBlock(execfile, functionName);
     writeAsmBlock(execfile, "\n");
@@ -420,9 +421,22 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
         i++;
     }
     
+    //Adds the function to the list of known variables of type "function <RET_TYPE>"
+    char* functionType = (char*) malloc((10 + strlen(returnType)) * sizeof(char));
+    i = -1;
+    while(++i <= 8) functionType[i] = "return "[i];
+    i = -1;
+    while(++i <= strlen(returnType)) functionType[i+9] = returnType[i];
+    addVariable(execfile, "function", functionName, 0);
+    
     if(compTok("void", returnType)) {
+        char* returnString = malloc(7*sizeof(char));
+        i = -1;
+        while(++i <= 7)
+            returnString[i] = "return"[i];
+
         setCompilerStackTop(-2*(parCount+3));
-        addVariable(execfile, returnType, "return", 2);
+        addVariable(execfile, returnType, returnString, 2);
     } else setCompilerStackTop(-2*(parCount+2));
     
     //All of the parameters should be in place. So, claim the spaces.
@@ -439,12 +453,12 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
 
         i++;
     }
-     
-    addVariable(execfile, "function", functionName, 0);
+    
 
     //Executes the code
     parseSegment(execfile, codeBlock);
-    
+    writeComment(execfile, "End of function code");
+
     //Return to the previous point of operation in the
     //assembly code if the program has not already done so.
     writeAsmBlock(execfile, "ret\n");
@@ -453,7 +467,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     writeAsmBlock(execfile, "functionend_");
     writeAsmBlock(execfile, functionName);
     writeAsmBlock(execfile, ":\n");
-    
+
     //Removes the vars from the list of known variables.
     i = compTok("void", returnType) ? -1 : 0;
     while(i < parCount) {
@@ -485,7 +499,6 @@ void handleReturn(FILE* execfile, char* subline, int tokenid) {
 
     //Change the stack pointer to point back to the beginning
     int size = ((VarFrame)getFromList(getVars(), listSize(getVars()) - 1))->addr + 1;
-    
     
     writeComment(execfile, "Deep end return computations");
     if(size > 0) { //If the size is positive, there are values that need skimming

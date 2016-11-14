@@ -50,7 +50,7 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
         return;
 
     }
-    
+
     //These values are preserved, and are used by the program to properly execute PEMDAS.
     static char opSymbols[] = "|^&<>=!+-*";
     static MathOperation operations[10] = {
@@ -120,13 +120,15 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
     
     char* varType = variableTypeOf(variableName);
     
-    if(varType && !strcmp(varType, "function")) {
-       
+    if(varType && (strstr(varType, "function") == varType)) {
+        
+        //printf("Function call to %s\n", variableName);
+
         //A function call
         while(calc[j++] != '(');
         char* funcParams = closureContent(&calc[j], '(', ')');
         
-        performFunctionCall(execfile, funcParams, "ptr", variableName);
+        performFunctionCall(execfile, funcParams, &varType[9], variableName);
         
         return;
     }

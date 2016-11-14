@@ -73,6 +73,8 @@ void performFunctionCall(FILE* execfile, char* params, CMP_TOK type, char* name)
     //Performs the final instructions that grab the return value and restore the stack
     finalizeReturn(execfile, size, type);
 
+    writeComment(execfile, "Finished function call");
+
 }
 
 void finalizeReturn(FILE* execfile, int size, CMP_TOK type) {

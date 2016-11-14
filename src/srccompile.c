@@ -191,6 +191,8 @@ void parseSegment(FILE* execfile, char* code) {
     
     //Remove variables if necessary in a function based on scope.
     if(LOOP_DEPTH >= LOOP_DEPTH_FUNCTION && endvars > numvars) {
+        
+        writeComment(execfile, "Free extra variables");
 
         while(endvars > numvars) {
             VarFrame v = remFromList(getVars(), endvars-1);
@@ -203,9 +205,9 @@ void parseSegment(FILE* execfile, char* code) {
         writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
         
         //Get the stack pointer before the segment
-        int stkaddrs = numvars ? ((VarFrame) getFromList(getVars(), numvars-1))->addr : 0;
+        int stkaddrs = numvars ? ((VarFrame) getFromList(getVars(), numvars-1))->addr > 0 : 0;
         char buffer[128];
-        sprintf(buffer, "ldi r16, %i\nsub yl, r16\n", stkaddrs);
+        sprintf(buffer, "ldi r16, %i\nsub yl, r16\n", stkaddrs > 0 ? stkaddrs : 0);
         writeAsmBlock(execfile, buffer);
 
         //Reset the stack pointer
