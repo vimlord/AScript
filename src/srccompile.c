@@ -140,10 +140,14 @@ void setCompilerStackTop(int idx) {
 
 int addVariable(FILE* execfile, CMP_TOK type, char* varname, int nbytes) {
     
+    //printf("Initializing '%s' '%s'\n", type, varname);
+    
     if(variableTypeOf(varname)) {
         //The variable already exists
         throwError("Attempting to reinitialize variable '%s %s'\n", type, varname);
     }
+
+    //printf("Will do it.\n");
 
     //The address of the new memory
     int ptr = (REL_STK += nbytes) - 1;

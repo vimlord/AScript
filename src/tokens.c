@@ -424,10 +424,10 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     //Adds the function to the list of known variables of type "function <RET_TYPE>"
     char* functionType = (char*) malloc((10 + strlen(returnType)) * sizeof(char));
     i = -1;
-    while(++i <= 8) functionType[i] = "return "[i];
+    while(++i <= 8) functionType[i] = "function "[i];
     i = -1;
     while(++i <= strlen(returnType)) functionType[i+9] = returnType[i];
-    addVariable(execfile, "function", functionName, 0);
+    addVariable(execfile, functionType, functionName, 0);
     
     if(compTok("void", returnType)) {
         char* returnString = malloc(7*sizeof(char));
