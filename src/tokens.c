@@ -263,7 +263,7 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
         writeAsmBlock(execfile, "mov yh, xh\nmov yl, xl\n");
         //Gets index on stack
         int stkIdx = stackAddressOfVar(varname);
-        if(stkIdx < 0) {
+        if(stkIdx <= -65536) {
             //The variable does not exist on the stack.
             throwError("A variable was not found.\n");
         }
@@ -272,9 +272,15 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
          * The index of the variable on the stack is then subtracted
          * from the pointer to the bottom of the stack.
          */
-        sprintf(addrBuffer, "ldi r16, %i\nldi r17, %i\n", stkIdx % 256, stkIdx / 256);
-        writeAsmBlock(execfile, addrBuffer);
-        writeAsmBlock(execfile, "sub yl, r16\nsbc yh, r17\n");
+        if(stkIdx >= 0) {
+            sprintf(addrBuffer, "ldi r16, %i\nldi r17, %i\n", stkIdx % 256, stkIdx / 256);
+            writeAsmBlock(execfile, addrBuffer);
+            writeAsmBlock(execfile, "sub yl, r16\nsbc yh, r17\n");
+        } else{
+            sprintf(addrBuffer, "ldi r16, %i\nldi r17, %i\n", (-stkIdx) % 256, (-stkIdx) / 256);
+            writeAsmBlock(execfile, addrBuffer);
+            writeAsmBlock(execfile, "add yl, r16\nadc yh, r17\n");
+        }
 
         //Increments y by the array address.
         if(arrIdxStr) {
@@ -494,8 +500,9 @@ void handleReturn(FILE* execfile, char* subline, int tokenid) {
             sprintf(buff, "return = %s", subline);
             if(!strcmp(variableTypeOf("return"), "ptr"))
                 processPtrAssign(execfile, buff, "return", "0");
-            else if(!strcmp(variableTypeOf("return"), "byte"))
+            else if(!strcmp(variableTypeOf("return"), "byte")) {
                 processByteAssign(execfile, buff, "return", "0");
+            }
             break;
         } i++;
     }
