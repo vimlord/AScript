@@ -30,10 +30,10 @@ void branchEQ(FILE* execfile, int regA, int regB, char* br) {
 void branchNE(FILE* execfile, int regA, int regB, char* br) {
     char scratch[64];
     //First, compare
-    sprintf(scratch, "cp r%i, r%i\n", regA, regB);
+    sprintf(scratch, "cpse r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
-    sprintf(scratch, "brne %s\n", br);
+    sprintf(scratch, "jmp %s\n", br);
     writeAsmBlock(execfile, scratch);
 
 }

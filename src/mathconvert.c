@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 void pemdas(FILE* execfile, char* calc, int nbytes) {
-    
+
     if(!(*calc)) {
         //Fills the address with 0 if the string is empty.
         loadReg(execfile, 16, "0");
@@ -207,9 +207,6 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
         sprintf(buff, "ldi r16, %i\npush r16\n", insert);
         writeAsmBlock(execfile, buff);
     }
-
-    loadReg(execfile, 16, calc);
-    stackPush(execfile, 16);
 
 }
 
