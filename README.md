@@ -30,6 +30,11 @@ byte j = byteArray[i];
 
 In the segment above, the first line creates an array of length 6. Arrays can only be instantiated with a constant length, meaning that an array cannot be created with a length equal to the result of a computation. However, an array can be accessed based on the result of a computation. In the example, one can access the ith element of an array in order to assign it to a variable. This allows for a user to iterate over a list, which enables actions such as sorting.
 
+####Arithmetic
+
+The compiler is written so that it will have the program run through the correct order of operations. The program will use the same order of operations used by the C family of operations. That is, ```() -> * -> + or - -> < or > -> == or != -> & -> |```. Currently, division is not supported, but that and other operations will eventually be supported.
+
+#
 ####Conditionals
 
 AScript allows for if-else statements and while loops. Both must be terminated with a semicolon when present.
@@ -56,11 +61,36 @@ if(input) {
 
 This segment of code takes the value of input and sets it to zero if it is not already zero. Otherwise, it will set the value equal to 1. In a sense, this statement is equivalent to the ! operation, which negates the truth of a statement.
 
-####Arithmetic
+#Functions
+AScript also has the ability to allow users to write functions. Like with conditional statements, functions should be terminated with a semicolon. A function can be written like so:
 
-The compiler is written so that it will have the program run through the correct order of operations. The program will use the same order of operations used by the C family of operations. That is, ```() -> * -> + or - -> < or > -> == or != -> & -> |```. Currently, division is not supported, but that and other operations will eventually be supported.
+```
+function <TYPE> <NAME>(<TYPE> x, <TYPE> y) {
+    ...
+};
+```
 
-##Usage
+Here, <TYPE> represents any variable type that can be instantiated, and <NAME> is the name of the function. A function can also be called doing something like 
+
+```
+byte x = byteFunc(2);
+```
+
+provided that there exists a function called byteFunc that takes a number. One can also call functions inside of other functions. So, one function that could be written is
+
+```
+function byte factorial(byte n) {
+    if(n > 1) {
+        return n * factorial(n-1);
+    } else {
+        return 1;
+    };
+};
+```
+
+Note that factorial takes a byte as a parameter, and returns a byte. In its code, it also calls a function that takes a byte as a parameter and returns a byte.
+
+#Usage
 
 Currently, there is no available builds of the compiler. However, the compiler source can be downloaded from here and compiled. To build the compiler, run the included makefile with 
 
