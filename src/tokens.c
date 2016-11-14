@@ -429,6 +429,7 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     while(++i <= strlen(returnType)) functionType[i+9] = returnType[i];
     addVariable(execfile, functionType, functionName, 0);
     
+    //Return type
     if(compTok("void", returnType)) {
         char* returnString = malloc(7*sizeof(char));
         i = -1;
@@ -491,7 +492,10 @@ void handleReturn(FILE* execfile, char* subline, int tokenid) {
             writeComment(execfile, "Compute return value");
             char buff[strlen(subline) + 16];
             sprintf(buff, "return = %s", subline);
-            processPtrAssign(execfile, buff, "return", "0");
+            if(!strcmp(variableTypeOf("return"), "ptr"))
+                processPtrAssign(execfile, buff, "return", "0");
+            else if(!strcmp(variableTypeOf("return"), "byte"))
+                processByteAssign(execfile, buff, "return", "0");
             break;
         } i++;
     }
