@@ -9,7 +9,7 @@ function byte sumn(byte n) {
     };
 };
 
-function int main() {
+function void main() {
     byte x = sumn(3);
 };
 
