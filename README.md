@@ -61,7 +61,7 @@ if(input) {
 
 This segment of code takes the value of input and sets it to zero if it is not already zero. Otherwise, it will set the value equal to 1. In a sense, this statement is equivalent to the ! operation, which negates the truth of a statement.
 
-#Functions
+####Functions
 AScript also has the ability to allow users to write functions. Like with conditional statements, functions should be terminated with a semicolon. A function can be written like so:
 
 ```
