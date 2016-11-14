@@ -47,18 +47,18 @@ void subOperation(FILE* execfile, char* partA, char* partB, int n) {
     while(i < 2*n) stackPop(execfile, 16+i++);
 
     //Add sequentially
-    subReg(execfile, 16, 16+n);
+    subReg(execfile, 16+n, 16);
     i = 1;
     while(i < n) {
         char buff[64];
-        sprintf(buff, "sbc %i, %i\n", 16+i, 16+i+n);
+        sprintf(buff, "sbc %i, %i\n", 16+i+n, 16+i);
         i++;
     }
     
     //Push to the stack
     i = n-1;
     while(i >= 0)
-        stackPush(execfile, 16+i--);
+        stackPush(execfile, 16+n+i--);
     }
 
 

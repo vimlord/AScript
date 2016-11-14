@@ -17,12 +17,17 @@ void writeComment(FILE* file, char* comment) {
 }
 
 void branchEQ(FILE* execfile, int regA, int regB, char* br) {
+    char label[64];
+    sprintf(label, "comp%i", comparisons++);
+    
     char scratch[64];
     //First, compare
     sprintf(scratch, "cp r%i, r%i\n", regA, regB);
     writeAsmBlock(execfile, scratch);
     //Then, branch if
-    sprintf(scratch, "breq %s\n", br);
+    sprintf(scratch, "brne %s\n", label);
+    writeAsmBlock(execfile, scratch);
+    sprintf(scratch, "jmp %s\n%s:\n", br, label);
     writeAsmBlock(execfile, scratch);
 
 }

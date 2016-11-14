@@ -10,9 +10,13 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
     int size = 0;
     
     writeComment(execfile, "Building stack frame for function call");
+    writeAsmBlock(execfile, "; Return type is ");
+    writeAsmBlock(execfile, type);
+    writeAsmBlock(execfile, "\n");
 
     //Places the return value
-    if(type) {
+    if(type && strcmp(type, "void")) {
+        writeComment(execfile, "Making space for return value");
         writeAsmBlock(execfile, "ldi r16, 0\n");
         
         int i = -1, size = sizeOfType(type);
@@ -34,7 +38,7 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
         char* val = contentToOperator(str, ',', '(', ')');
 
         char buff[32 + strlen(val)];
-        sprintf(buff, "Calculating parameter %s", val);
+        sprintf(buff, "Calculating parameter '%s'", val);
         writeComment(execfile, buff);
 
         pemdas(execfile, val, 2);

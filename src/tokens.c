@@ -435,9 +435,9 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
         while(++i <= 7)
             returnString[i] = "return"[i];
 
-        setCompilerStackTop(-2*(parCount+3));
-        addVariable(execfile, returnType, returnString, 2);
-    } else setCompilerStackTop(-2*(parCount+2));
+        setCompilerStackTop(-2*(parCount+1) - sizeOfType(returnType));
+        addVariable(execfile, returnType, returnString, sizeOfType(returnType));
+    } else setCompilerStackTop(-2*(parCount+1));
     
     //All of the parameters should be in place. So, claim the spaces.
     i = 0;
@@ -454,7 +454,6 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
         i++;
     }
     
-
     //Executes the code
     parseSegment(execfile, codeBlock);
     writeComment(execfile, "End of function code");
