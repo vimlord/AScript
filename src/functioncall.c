@@ -9,6 +9,8 @@
 int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
     int size = 0;
     
+    writeComment(execfile, "Building stack frame for function call");
+
     //Places the return value
     if(type) {
         writeAsmBlock(execfile, "ldi r16, 0\n");
@@ -30,9 +32,15 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
         
         //Finds and adds the next parameter.
         char* val = contentToOperator(str, ',', '(', ')');
+
+        char buff[32 + strlen(val)];
+        sprintf(buff, "Calculating parameter %s", val);
+        writeComment(execfile, buff);
+
         pemdas(execfile, val, 2);
 
-        str = &str[strlen(val)+1];
+        str = &str[strlen(val)];
+        if(*str) str = &str[1];
 
         size += 2;
 
@@ -49,11 +57,16 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
 
 void performFunctionCall(FILE* execfile, char* params, CMP_TOK type, char* name) {
     
+    char buff[256];
+
+    sprintf(buff, "Calling function %s %s(%s)", type, name, params);
+    writeComment(execfile, buff);
+
+
     //First, the stack frame needs to be setup.
     int size = buildStkFrame(execfile, params, type);
     
     //Jumps to the function. The program counter will be pushed to the stack.
-    char buff[256];
     sprintf(buff, "call function_%s\n", name);
     writeAsmBlock(execfile, buff);
     

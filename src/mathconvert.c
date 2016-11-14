@@ -121,7 +121,7 @@ void pemdas(FILE* execfile, char* calc, int nbytes) {
     char* varType = variableTypeOf(variableName);
     
     if(varType && !strcmp(varType, "function")) {
-
+       
         //A function call
         while(calc[j++] != '(');
         char* funcParams = closureContent(&calc[j], '(', ')');
