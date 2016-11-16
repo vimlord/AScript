@@ -1,7 +1,11 @@
-byte val = 1;
-byte n = 1;
 
-while(n <= 4) {
-    val = val * n;
-    n = n + 1;
-};
+int factorial(byte x) {
+    byte val = 1;
+    byte n = 1;
+
+    while(n <= x) {
+        val = val * n;
+        n = n + 1;
+    };
+
+}
