@@ -131,6 +131,12 @@ void loadReg(FILE* execfile, int r, char* v) {
     writeAsmBlock(execfile, cmdline);
 }
 
+void loadRegV(FILE* execfile, int r, int v) {
+    char value[16];
+    sprintf(value, "%i", v);
+    loadReg(execfile, r, value);
+}
+
 void addReg(FILE* execfile, int a, int b) {
     char cmdline[64];
     sprintf(cmdline, "add r%i, r%i\n", a, b);

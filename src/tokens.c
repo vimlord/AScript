@@ -273,12 +273,12 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
          * from the pointer to the bottom of the stack.
          */
         if(stkIdx >= 0) {
-            sprintf(addrBuffer, "ldi r16, %i\nldi r17, %i\n", stkIdx % 256, stkIdx / 256);
-            writeAsmBlock(execfile, addrBuffer);
+            loadRegV(execfile, 16, stkIdx % 256);
+            loadRegV(execfile, 17, stkIdx / 256);
             writeAsmBlock(execfile, "sub yl, r16\nsbc yh, r17\n");
-        } else{
-            sprintf(addrBuffer, "ldi r16, %i\nldi r17, %i\n", (-stkIdx) % 256, (-stkIdx) / 256);
-            writeAsmBlock(execfile, addrBuffer);
+        } else {
+            loadRegV(execfile, 16, (-stkIdx % 256));
+            loadRegV(execfile, 17, (-stkIdx / 256));
             writeAsmBlock(execfile, "add yl, r16\nadc yh, r17\n");
         }
 
@@ -517,9 +517,8 @@ void handleReturn(FILE* execfile, char* subline, int tokenid) {
         writeAsmBlock(execfile, "in r16, spl\nin r17,sph\n");
         
         //Subtract the size of the frame stack from the pointer
-        char buff[256];
-        sprintf(buff, "ldi r18, %i\nldi r19, %i\n", size%256, size/256);
-        writeAsmBlock(execfile, buff);
+        loadRegV(execfile, 18, size % 256);
+        loadRegV(execfile, 19, size / 256);
         writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
         writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
     }

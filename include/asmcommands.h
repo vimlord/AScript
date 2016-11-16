@@ -28,6 +28,7 @@ void copyReg(FILE* execfile, int dst, int src);
 void copyRegFromMem(FILE* execfile, int dst, int src);
 void copyRegToMem(FILE* execfile, int dst, int src);
 void loadReg(FILE* execfile, int r, char* v);
+void loadRegV(FILE* execfile, int r, int v);
 
 void addReg(FILE* execfile, int a, int b);
 void subReg(FILE* execfile, int a, int b);

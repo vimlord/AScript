@@ -17,11 +17,11 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type) {
     //Places the return value
     if(type && strcmp(type, "void")) {
         writeComment(execfile, "Making space for return value");
-        writeAsmBlock(execfile, "ldi r16, 0\n");
+        loadRegV(execfile, 16, 0);
         
         int i = -1, size = sizeOfType(type);
         while(++i < size)
-            writeAsmBlock(execfile, "push r16\n");
+            stackPush(execfile, 16);
 
         //The size of the stack should not include the return value.
         size = 0;
@@ -92,9 +92,8 @@ void finalizeReturn(FILE* execfile, int size, CMP_TOK type) {
     writeAsmBlock(execfile, "in r16, spl\nin r17, sph\n");
     
     //Loads the size of the stack into memory.
-    char buff[64];
-    sprintf(buff, "ldi r18, %i\nldi r19, %i\n", size%256, size/256);
-    writeAsmBlock(execfile, buff);
+    loadRegV(execfile, 18, size % 256);
+    loadRegV(execfile, 19, size / 256);
 
     //Subtract the stack size, and then drop the part of the frame.
     writeAsmBlock(execfile, "sub r16, r18\nsbc r17, r19\nout spl, r16\nout sph, r17\n");
