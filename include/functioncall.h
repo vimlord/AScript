@@ -26,10 +26,10 @@ int buildStkFrame(FILE* execfile, char* params, CMP_TOK type);
 void performFunctionCall(FILE* execfile, char* params, CMP_TOK type, char* name);
 
 /**
- * Returns from a function. Places the return value where it needs to be.
+ * Returns from a function.
  * Called on the end that is returning.
  */
-void returnFromFunction(FILE* execfile);
+void performFunctionReturn(FILE* execfile);
 
 /**
  * Uses the remains of the stack frame to finalize return from a function.

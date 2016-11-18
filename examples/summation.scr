@@ -3,7 +3,7 @@ function byte sumn(byte n) {
     if(n == 0) {
         return 0;
     } else if(n > 0){
-        return n * sumn(n-1);
+        return n + sumn(n-1);
     } else {
         return sumn(-n);
     };

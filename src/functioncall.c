@@ -81,6 +81,29 @@ void performFunctionCall(FILE* execfile, char* params, CMP_TOK type, char* name)
 
 }
 
+void performFunctionReturn(FILE* execfile) {
+
+    //Change the stack pointer to point back to the beginning
+    int size = ((VarFrame)getFromList(getVars(), listSize(getVars()) - 1))->addr + 1;
+    
+    writeComment(execfile, "Deep end return computations");
+    if(size > 0) { //If the size is positive, there are values that need skimming
+
+        //Get the current stack pointer
+        writeAsmBlock(execfile, "in r16, spl\nin r17,sph\n");
+        
+        //Subtract the size of the frame stack from the pointer
+        loadRegV(execfile, 18, size % 256);
+        loadRegV(execfile, 19, size / 256);
+        writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
+        writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
+    }
+
+    //Performs the return.
+    writeAsmBlock(execfile, "ret\n");
+
+}
+
 void finalizeReturn(FILE* execfile, int size, CMP_TOK type) {
     //At this point, the stack pointer should point to the high bit of x_old on the stack.
      
@@ -90,13 +113,13 @@ void finalizeReturn(FILE* execfile, int size, CMP_TOK type) {
     
     //Pops the values from the stack.
     writeAsmBlock(execfile, "in r16, spl\nin r17, sph\n");
-    
+
     //Loads the size of the stack into memory.
     loadRegV(execfile, 18, size % 256);
     loadRegV(execfile, 19, size / 256);
 
     //Subtract the stack size, and then drop the part of the frame.
-    writeAsmBlock(execfile, "sub r16, r18\nsbc r17, r19\nout spl, r16\nout sph, r17\n");
+    writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\nout spl, r16\nout sph, r17\n");
 
     //All that should be left is the return value, which should be at the top of the stack.
 

@@ -2,6 +2,7 @@
 
 #include "asmcommands.h"
 #include "error.h"
+#include "functioncall.h"
 #include "mathconvert.h"
 #include "srccompile.h"
 #include "strmanip.h"
@@ -292,7 +293,7 @@ void processByteAssign(FILE* execfile, char* line, char* varname, char* arrIdxSt
             stackPop(execfile, 17);
 
             //Then, we need to add it to the zero memory address
-            writeAsmBlock(execfile, "add yl, r16\nadc yh, r17");
+            writeAsmBlock(execfile, "add yl, r16\nadc yh, r17\n");
         } 
         
         writeComment(execfile, "Storing end result");
@@ -464,11 +465,10 @@ void processFunction(FILE* execfile, char* subline, int tokenid) {
     //Executes the code
     parseSegment(execfile, codeBlock);
     writeComment(execfile, "End of function code");
-
-    //Return to the previous point of operation in the
-    //assembly code if the program has not already done so.
-    writeAsmBlock(execfile, "ret\n");
     
+    //Compute the size of the stack and remove it
+    performFunctionReturn(execfile);
+
     //Special label used to skip over the function 
     writeAsmBlock(execfile, "functionend_");
     writeAsmBlock(execfile, functionName);
@@ -507,23 +507,7 @@ void handleReturn(FILE* execfile, char* subline, int tokenid) {
         } i++;
     }
 
-    //Change the stack pointer to point back to the beginning
-    int size = ((VarFrame)getFromList(getVars(), listSize(getVars()) - 1))->addr + 1;
-    
-    writeComment(execfile, "Deep end return computations");
-    if(size > 0) { //If the size is positive, there are values that need skimming
-
-        //Get the current stack pointer
-        writeAsmBlock(execfile, "in r16, spl\nin r17,sph\n");
-        
-        //Subtract the size of the frame stack from the pointer
-        loadRegV(execfile, 18, size % 256);
-        loadRegV(execfile, 19, size / 256);
-        writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
-        writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
-    }
-    //Performs the return.
-    writeAsmBlock(execfile, "ret\n");
+    performFunctionReturn(execfile);
    
 }
 
