@@ -4,6 +4,21 @@ AScript (ArduinoScript, or An AScript) is my attempt to create a custom language
 
 ##Syntax
 
+####Commenting
+
+AScript has support for commenting, which works exactly the same way as the double slash comments available in C, C++, and other C-family languages. To illustrate:
+
+```
+//This is a byte called 'a'. It is instantiated as zero.
+byte a = 0;
+
+//This is an infinite loop that continuously increments a.
+while(1) {
+    a = a + 1;
+}
+
+```
+
 ####Variables
 
 Currently, the only datatype supported is byte. They can be instantiated like so:
