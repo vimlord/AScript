@@ -1,5 +1,6 @@
 
-void main() {
+function void main() {
+    //Creates an array to sort
     byte[8] array;
     array[0] = 1;
     array[1] = 6;

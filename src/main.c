@@ -90,7 +90,12 @@ int main(int argc, char* argv[]) {
     while(*(nextLine = stringUpTo(sourceFile, '\n', '\0', '\0')) != EOF) {
         //Gets the length of the String.
         int i = -1;
-        while(nextLine[++i]);
+        while(nextLine[++i]) {
+            //Handles commenting
+            if(nextLine[i] == '/' && nextLine[i+1] == '/') {
+                nextLine[i--] = '\0';
+            }
+        }
         
         //printf("%s\n", nextLine);
         fwrite(nextLine, 1, i, swapFile0);

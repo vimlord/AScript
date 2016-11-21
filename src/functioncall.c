@@ -96,7 +96,10 @@ void performFunctionReturn(FILE* execfile) {
         loadRegV(execfile, 18, size % 256);
         loadRegV(execfile, 19, size / 256);
         writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
+
+        //Set new stack pointer
         writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
+        
     }
 
     //Performs the return.
@@ -113,13 +116,15 @@ void finalizeReturn(FILE* execfile, int size, CMP_TOK type) {
     
     //Pops the values from the stack.
     writeAsmBlock(execfile, "in r16, spl\nin r17, sph\n");
-
+    
     //Loads the size of the stack into memory.
     loadRegV(execfile, 18, size % 256);
     loadRegV(execfile, 19, size / 256);
 
     //Subtract the stack size, and then drop the part of the frame.
-    writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\nout spl, r16\nout sph, r17\n");
+    writeAsmBlock(execfile, "add r16, r18\nadc r17, r19\n");
+
+    writeAsmBlock(execfile, "out spl, r16\nout sph, r17\n");
 
     //All that should be left is the return value, which should be at the top of the stack.
 
