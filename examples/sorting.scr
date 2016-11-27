@@ -16,7 +16,8 @@ function void main() {
     byte min;
     byte indJ;
     byte tmp;
-
+    
+    //Performs Selection sort
     while(i < 8) {
 
         j = i + 1;

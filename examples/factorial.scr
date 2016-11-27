@@ -2,7 +2,8 @@
 int factorial(byte x) {
     byte val = 1;
     byte n = 1;
-
+    
+    //Iterative computation of factorial
     while(n <= x) {
         val = val * n;
         n = n + 1;
