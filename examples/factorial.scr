@@ -1,5 +1,5 @@
 
-int factorial(byte x) {
+function byte factorial(byte x) {
     byte val = 1;
     byte n = 1;
     
@@ -9,4 +9,6 @@ int factorial(byte x) {
         n = n + 1;
     };
 
-}
+    return val;
+
+};
