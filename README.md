@@ -15,7 +15,7 @@ byte a = 0;
 //This is an infinite loop that continuously increments a.
 while(1) {
     a = a + 1;
-}
+};
 
 ```
 
@@ -132,7 +132,7 @@ The executable also provides several flags that can be enabled to customize comp
 For example, if I wanted to compile the sorting demo (examples/sorting.scr) to test.asm, using the O and w flags, I would run:
 
 ```
-./ascript -o test.asm examples/sorting.asm -Ow
+./ascript -o test.asm examples/sorting.scr -Ow
 ```
 
 Note that the -o flag is separate from the other flags, and that test.asm immediately succeeds it. This rule must be followed when using the output flag, although -o does not have to be immediately after the program name.
