@@ -1,10 +1,10 @@
-#AScript
+# AScript
 
 AScript (ArduinoScript, or An AScript) is my attempt to create a custom language that can be converted into assembly for use by the Arduino UNO's ATmega328P processor. I decided to do this while in CS383 (Computer Organization and Programming), in which we had to learn assembly language for use on an Arduino UNO with an ATmega328P processor.
 
-##Syntax
+## Syntax
 
-####Commenting
+#### Commenting
 
 AScript has support for commenting, which works exactly the same way as the double slash comments available in C, C++, and other C-family languages. To illustrate:
 
@@ -19,7 +19,7 @@ while(1) {
 
 ```
 
-####Variables
+#### Variables
 
 Currently, the only datatype supported is byte. They can be instantiated like so:
 
@@ -45,12 +45,12 @@ byte j = byteArray[i];
 
 In the segment above, the first line creates an array of length 6. Arrays can only be instantiated with a constant length, meaning that an array cannot be created with a length equal to the result of a computation. However, an array can be accessed based on the result of a computation. In the example, one can access the ith element of an array in order to assign it to a variable. This allows for a user to iterate over a list, which enables actions such as sorting.
 
-####Arithmetic
+#### Arithmetic
 
 The compiler is written so that it will have the program run through the correct order of operations. The program will use the same order of operations used by the C family of operations. That is, ```() -> * -> + or - -> < or > -> == or != -> & -> |```. Currently, division is not supported, but that and other operations will eventually be supported.
 
-#
-####Conditionals
+
+#### Conditionals
 
 AScript allows for if-else statements and while loops. Both must be terminated with a semicolon when present.
 
@@ -76,7 +76,7 @@ if(input) {
 
 This segment of code takes the value of input and sets it to zero if it is not already zero. Otherwise, it will set the value equal to 1. In a sense, this statement is equivalent to the ! operation, which negates the truth of a statement.
 
-####Functions
+#### Functions
 AScript also has the ability to allow users to write functions. Like with conditional statements, functions should be terminated with a semicolon. A function can be written like so:
 
 ```
@@ -105,7 +105,7 @@ function byte factorial(byte n) {
 
 Note that factorial takes a byte as a parameter, and returns a byte. In its code, it also calls a function that takes a byte as a parameter and returns a byte.
 
-#Usage
+# Usage
 
 Currently, there is no available builds of the compiler. However, the compiler source can be downloaded from here and compiled. To build the compiler, run the included makefile with 
 
@@ -137,6 +137,6 @@ For example, if I wanted to compile the sorting demo (examples/sorting.scr) to t
 
 Note that the -o flag is separate from the other flags, and that test.asm immediately succeeds it. This rule must be followed when using the output flag, although -o does not have to be immediately after the program name.
 
-##Future
+## Future
 
 In the future, I hope to add more functionality to the language. At this point, the language still needs to undergo a lot of testing and improvement. Future changes will hopefully include optimization and I/O through the Arduino's I/O ports.
